@@ -9,7 +9,6 @@
   <link rel="icon" href="logovip.png" type="image/png">
 </head>
 <body class="bg-gray-50 font-sans">
-  <!-- Header + Hero (same as before) -->
   <header class="bg-white border-b sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
       <div class="flex items-center gap-4">
@@ -24,30 +23,28 @@
     <h1 class="text-5xl font-bold tracking-tight text-gray-900 mb-4">Quality Finds. Local Pickup.</h1>
   </div>
 
-  <!-- Mission -->
   <div class="bg-[#ffa125] text-white py-8">
     <div class="max-w-4xl mx-auto px-6 text-center">
       <p class="text-lg font-medium">Every purchase at VIP Outlet Deals is a win for you <strong>and</strong> helps fund the important work of <strong>Heart Response Ministry</strong>. Shop with a mission.</p>
     </div>
   </div>
 
-  <!-- Search + Filters -->
   <div class="max-w-7xl mx-auto px-6 py-8">
     <div class="flex flex-col md:flex-row gap-4">
-      <input id="searchInput" type="text" placeholder="Search items..." class="flex-1 px-6 py-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#ffa125]">
+      <input id="searchInput" type="text" placeholder="Search items..." 
+             class="flex-1 px-6 py-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#ffa125]">
       <select id="categoryFilter" class="px-6 py-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#ffa125]">
         <option value="">All Categories</option>
       </select>
     </div>
   </div>
 
-  <!-- Product Grid -->
   <div class="max-w-7xl mx-auto px-6 pb-16">
     <div id="productGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
   </div>
 
   <script>
-    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQPXYpbeoPGUucM-ztzc19S0iUHZmfAiHR-BDq-Czmfc5FU2RRheHth7ChElIYqBcKwobhzSwwe1TGi/pub?output=csv&gid=953401573";
+    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQPXYpbeoPGUucM-ztzc19S0iUHZmfAiHR-BDq-Czmfc5FU2RRheHth7ChElIYqBcKwobhzSwwe1TGi/pub?output=csv";
 
     async function loadInventory() {
       const grid = document.getElementById('productGrid');
@@ -56,9 +53,8 @@
       try {
         const response = await fetch(SHEET_URL);
         const text = await response.text();
-
-        // Better CSV parsing that handles commas inside fields
         const rows = parseCSV(text);
+        
         const headers = rows[0];
         const data = rows.slice(1);
 
@@ -96,7 +92,7 @@
               <p class="text-xs font-medium text-[#ffa125] uppercase">${item.Category || 'Other'}</p>
               <h3 class="font-semibold text-lg mt-2 mb-3 line-clamp-3">${item.Title}</h3>
               <p class="text-3xl font-bold text-gray-900 mb-6">$${price.toFixed(2)}</p>
-              <button onclick="interested('${item.SKU}', '${item.Title.replace(/'/g, "\\'")}')" 
+              <button onclick="interested('${item.SKU}', '${item.Title}')" 
                       class="w-full bg-gray-900 hover:bg-black text-white py-4 rounded-2xl font-semibold">
                 I'm Interested
               </button>
@@ -105,11 +101,11 @@
           grid.appendChild(card);
         });
       } catch (e) {
-        grid.innerHTML = '<p class="col-span-full text-center py-12 text-red-500">Error loading data. Please refresh.</p>';
+        grid.innerHTML = '<p class="col-span-full text-center py-12 text-red-500">Error loading data. Please refresh the page.</p>';
       }
     }
 
-    // Better CSV parser
+    // Robust CSV parser
     function parseCSV(text) {
       const lines = text.split('\n');
       const result = [];
@@ -136,7 +132,7 @@
     }
 
     function interested(sku, title) {
-      alert(`Interested in: ${title}\n\nWe'll send you an invoice for SKU ${sku}.`);
+      alert(`Interested in: ${title}\n\nWe'll send you an invoice shortly for SKU ${sku}.`);
     }
 
     loadInventory();
