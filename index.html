@@ -19,16 +19,23 @@
     </div>
   </header>
 
-  <div class="max-w-7xl mx-auto px-6 py-12 text-center">
+  <div class="max-w-4xl mx-auto px-6 py-12 text-center">
     <img src="logovip.png" alt="VIP Outlet Deals" class="mx-auto h-40 object-contain mb-8">
     <h1 class="text-5xl font-bold tracking-tight text-gray-900 mb-4">Quality Finds. Local Pickup.</h1>
   </div>
 
-  <!-- Search + Filter -->
-  <div class="max-w-7xl mx-auto px-6 pb-8">
+  <!-- Mission -->
+  <div class="bg-[#ffa125] text-white py-8">
+    <div class="max-w-4xl mx-auto px-6 text-center">
+      <p class="text-lg font-medium">Every purchase at VIP Outlet Deals is a win for you <strong>and</strong> helps fund the important work of <strong>Heart Response Ministry</strong>. Shop with a mission.</p>
+    </div>
+  </div>
+
+  <!-- Search + Filters -->
+  <div class="max-w-7xl mx-auto px-6 py-8">
     <div class="flex flex-col md:flex-row gap-4">
-      <input id="searchInput" type="text" placeholder="Search items..." class="flex-1 px-6 py-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500">
-      <select id="categoryFilter" class="px-6 py-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500">
+      <input id="searchInput" type="text" placeholder="Search items..." class="flex-1 px-6 py-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#ffa125]">
+      <select id="categoryFilter" class="px-6 py-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#ffa125]">
         <option value="">All Categories</option>
       </select>
     </div>
@@ -49,19 +56,20 @@
       try {
         const response = await fetch(SHEET_URL);
         const text = await response.text();
-        const rows = text.split('\n').map(row => row.split(',').map(cell => cell.replace(/^"|"$/g, '').trim()));
 
+        // Better CSV parsing that handles commas inside fields
+        const rows = parseCSV(text);
         const headers = rows[0];
         const data = rows.slice(1);
 
-        // Populate category filter
+        // Populate categories
         const categories = new Set();
         data.forEach(row => {
-          const catIndex = headers.indexOf("Category");
-          if (row[catIndex]) categories.add(row[catIndex]);
+          const cat = row[headers.indexOf("Category")] || "";
+          if (cat) categories.add(cat);
         });
         const filter = document.getElementById('categoryFilter');
-        categories.forEach(cat => {
+        Array.from(categories).sort().forEach(cat => {
           const opt = document.createElement('option');
           opt.value = cat;
           opt.textContent = cat;
@@ -82,13 +90,14 @@
           card.className = "bg-white rounded-3xl shadow hover:shadow-xl overflow-hidden";
           card.innerHTML = `
             <div class="h-56 bg-gray-100 flex items-center justify-center overflow-hidden">
-              ${item['Image URL'] ? `<img src="${item['Image URL']}" class="w-full h-full object-cover">` : '<div class="text-gray-400 text-sm">No image yet</div>'}
+              ${item['Image URL'] ? `<img src="${item['Image URL']}" class="w-full h-full object-cover">` : '<div class="text-gray-400">No image yet</div>'}
             </div>
             <div class="p-6">
-              <p class="text-xs font-medium text-orange-600 uppercase">${item.Category || 'Other'}</p>
+              <p class="text-xs font-medium text-[#ffa125] uppercase">${item.Category || 'Other'}</p>
               <h3 class="font-semibold text-lg mt-2 mb-3 line-clamp-3">${item.Title}</h3>
               <p class="text-3xl font-bold text-gray-900 mb-6">$${price.toFixed(2)}</p>
-              <button onclick="interested('${item.SKU}', '${item.Title}')" class="w-full bg-gray-900 hover:bg-black text-white py-4 rounded-2xl font-semibold">
+              <button onclick="interested('${item.SKU}', '${item.Title.replace(/'/g, "\\'")}')" 
+                      class="w-full bg-gray-900 hover:bg-black text-white py-4 rounded-2xl font-semibold">
                 I'm Interested
               </button>
             </div>
@@ -96,8 +105,34 @@
           grid.appendChild(card);
         });
       } catch (e) {
-        grid.innerHTML = '<p class="col-span-full text-center py-12 text-red-500">Error loading inventory. Please refresh.</p>';
+        grid.innerHTML = '<p class="col-span-full text-center py-12 text-red-500">Error loading data. Please refresh.</p>';
       }
+    }
+
+    // Better CSV parser
+    function parseCSV(text) {
+      const lines = text.split('\n');
+      const result = [];
+      for (let line of lines) {
+        if (!line.trim()) continue;
+        const row = [];
+        let current = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          if (char === '"') {
+            inQuotes = !inQuotes;
+          } else if (char === ',' && !inQuotes) {
+            row.push(current);
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+        row.push(current);
+        result.push(row);
+      }
+      return result;
     }
 
     function interested(sku, title) {
