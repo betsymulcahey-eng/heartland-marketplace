@@ -9,7 +9,7 @@
   <link rel="icon" href="logovip.png" type="image/png">
 </head>
 <body class="bg-gray-50 font-sans">
-  <!-- Header -->
+  <!-- Header + Hero (same as before) -->
   <header class="bg-white border-b sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
       <div class="flex items-center gap-4">
@@ -19,47 +19,16 @@
     </div>
   </header>
 
-  <!-- Big Logo Hero -->
-  <div class="bg-white py-10 border-b">
-    <div class="max-w-4xl mx-auto px-6 text-center">
-      <img src="logovip.png" alt="VIP Outlet Deals" class="mx-auto h-40 md:h-48 object-contain mb-8">
-      <h1 class="text-5xl md:text-6xl font-bold tracking-tight text-gray-900 mb-4">
-        Quality Finds.<br>Local Pickup.
-      </h1>
-    </div>
+  <div class="max-w-7xl mx-auto px-6 py-12 text-center">
+    <img src="logovip.png" alt="VIP Outlet Deals" class="mx-auto h-40 object-contain mb-8">
+    <h1 class="text-5xl font-bold tracking-tight text-gray-900 mb-4">Quality Finds. Local Pickup.</h1>
   </div>
 
-  <!-- Mission Bar - Exact orange from your logo -->
-  <div class="bg-[#ffa125] text-white py-8">
-    <div class="max-w-4xl mx-auto px-6 text-center">
-      <p class="text-lg font-medium">
-        Every purchase at VIP Outlet Deals is a win for you <strong>and</strong> helps fund the important work of 
-        <strong>Heart Response Ministry</strong>. Shop with a mission.
-      </p>
-    </div>
-  </div>
-
-  <!-- How It Works -->
-  <div class="max-w-4xl mx-auto px-6 py-12 text-center">
-    <p class="text-xl text-gray-600">
-      Browse our current inventory below. When you're ready to buy, message us and we'll send an invoice. 
-      Payment must be completed quickly — items are not held until paid.
-    </p>
-    <div class="mt-6 inline-flex items-center gap-2 text-gray-600">
-      <i class="fas fa-map-marker-alt"></i>
-      <span>Heartland Outlet • 1698 Vierling Drive E, Shakopee, MN</span>
-    </div>
-  </div>
-
-  <!-- Search + Filters -->
+  <!-- Search + Filter -->
   <div class="max-w-7xl mx-auto px-6 pb-8">
     <div class="flex flex-col md:flex-row gap-4">
-      <div class="flex-1 relative">
-        <i class="fas fa-search absolute left-5 top-4 text-gray-400"></i>
-        <input id="searchInput" type="text" placeholder="Search items..." 
-               class="w-full pl-12 pr-5 py-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#ffa125] text-lg">
-      </div>
-      <select id="categoryFilter" class="px-6 py-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#ffa125] text-lg">
+      <input id="searchInput" type="text" placeholder="Search items..." class="flex-1 px-6 py-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500">
+      <select id="categoryFilter" class="px-6 py-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500">
         <option value="">All Categories</option>
       </select>
     </div>
@@ -67,54 +36,72 @@
 
   <!-- Product Grid -->
   <div class="max-w-7xl mx-auto px-6 pb-16">
-    <div id="productGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      <!-- JS populated -->
-    </div>
+    <div id="productGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
   </div>
 
   <script>
     const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQPXYpbeoPGUucM-ztzc19S0iUHZmfAiHR-BDq-Czmfc5FU2RRheHth7ChElIYqBcKwobhzSwwe1TGi/pub?output=csv&gid=953401573";
 
     async function loadInventory() {
-      const response = await fetch(SHEET_URL);
-      const text = await response.text();
-      const rows = text.split('\n').map(r => r.split(',').map(c => c.replace(/^"|"$/g, '').trim()));
-      
-      const headers = rows[0];
-      const data = rows.slice(1);
       const grid = document.getElementById('productGrid');
-      grid.innerHTML = '';
+      grid.innerHTML = '<p class="col-span-full text-center py-12 text-gray-500">Loading inventory...</p>';
 
-      data.forEach(row => {
-        const item = {};
-        headers.forEach((h,i) => item[h] = row[i] || '');
-        
-        if (!item.SKU || (item.Status !== 'Live' && item.Status !== 'New')) return;
+      try {
+        const response = await fetch(SHEET_URL);
+        const text = await response.text();
+        const rows = text.split('\n').map(row => row.split(',').map(cell => cell.replace(/^"|"$/g, '').trim()));
 
-        const price = parseFloat(item['Regular Price'] || 0);
+        const headers = rows[0];
+        const data = rows.slice(1);
 
-        const card = document.createElement('div');
-        card.className = "bg-white rounded-3xl shadow hover:shadow-xl overflow-hidden";
-        card.innerHTML = `
-          <div class="h-56 bg-gray-100 flex items-center justify-center overflow-hidden">
-            ${item['Image URL'] ? `<img src="${item['Image URL']}" class="w-full h-full object-cover">` : '<div class="text-gray-400">No image yet</div>'}
-          </div>
-          <div class="p-6">
-            <p class="text-xs font-medium text-[#ffa125] uppercase">${item.Category || 'Other'}</p>
-            <h3 class="font-semibold text-lg mt-2 mb-3 line-clamp-3">${item.Title}</h3>
-            <p class="text-3xl font-bold text-gray-900 mb-6">$${price.toFixed(2)}</p>
-            <button onclick="interested('${item.SKU}', '${item.Title}')" 
-                    class="w-full bg-gray-900 hover:bg-black text-white py-4 rounded-2xl font-semibold">
-              I'm Interested
-            </button>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
+        // Populate category filter
+        const categories = new Set();
+        data.forEach(row => {
+          const catIndex = headers.indexOf("Category");
+          if (row[catIndex]) categories.add(row[catIndex]);
+        });
+        const filter = document.getElementById('categoryFilter');
+        categories.forEach(cat => {
+          const opt = document.createElement('option');
+          opt.value = cat;
+          opt.textContent = cat;
+          filter.appendChild(opt);
+        });
+
+        grid.innerHTML = '';
+
+        data.forEach(row => {
+          const item = {};
+          headers.forEach((h, i) => item[h] = row[i] || '');
+
+          if (!item.SKU || (item.Status !== 'Live' && item.Status !== 'New')) return;
+
+          const price = parseFloat(item['Regular Price'] || 0);
+
+          const card = document.createElement('div');
+          card.className = "bg-white rounded-3xl shadow hover:shadow-xl overflow-hidden";
+          card.innerHTML = `
+            <div class="h-56 bg-gray-100 flex items-center justify-center overflow-hidden">
+              ${item['Image URL'] ? `<img src="${item['Image URL']}" class="w-full h-full object-cover">` : '<div class="text-gray-400 text-sm">No image yet</div>'}
+            </div>
+            <div class="p-6">
+              <p class="text-xs font-medium text-orange-600 uppercase">${item.Category || 'Other'}</p>
+              <h3 class="font-semibold text-lg mt-2 mb-3 line-clamp-3">${item.Title}</h3>
+              <p class="text-3xl font-bold text-gray-900 mb-6">$${price.toFixed(2)}</p>
+              <button onclick="interested('${item.SKU}', '${item.Title}')" class="w-full bg-gray-900 hover:bg-black text-white py-4 rounded-2xl font-semibold">
+                I'm Interested
+              </button>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+      } catch (e) {
+        grid.innerHTML = '<p class="col-span-full text-center py-12 text-red-500">Error loading inventory. Please refresh.</p>';
+      }
     }
 
     function interested(sku, title) {
-      alert(`Interested in: ${title}\n\nWe'll send you an invoice shortly for SKU ${sku}.`);
+      alert(`Interested in: ${title}\n\nWe'll send you an invoice for SKU ${sku}.`);
     }
 
     loadInventory();
