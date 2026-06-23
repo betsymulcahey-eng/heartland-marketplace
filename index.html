@@ -9,7 +9,6 @@
   <link rel="icon" href="logovip.png" type="image/png">
 </head>
 <body class="bg-gray-50 font-sans">
-  <!-- Header and Hero same as before -->
   <header class="bg-white border-b sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
       <div class="flex items-center gap-4">
@@ -24,6 +23,12 @@
     <h1 class="text-5xl font-bold tracking-tight text-gray-900 mb-4">Quality Finds. Local Pickup.</h1>
   </div>
 
+  <div class="bg-[#ffa125] text-white py-8">
+    <div class="max-w-4xl mx-auto px-6 text-center">
+      <p class="text-lg font-medium">Every purchase at VIP Outlet Deals is a win for you <strong>and</strong> helps fund the important work of <strong>Heart Response Ministry</strong>. Shop with a mission.</p>
+    </div>
+  </div>
+
   <div class="max-w-7xl mx-auto px-6 py-8">
     <div class="flex flex-col md:flex-row gap-4">
       <input id="searchInput" type="text" placeholder="Search items..." class="flex-1 px-6 py-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#ffa125]">
@@ -35,6 +40,16 @@
 
   <div class="max-w-7xl mx-auto px-6 pb-16">
     <div id="productGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+  </div>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="hidden fixed inset-0 bg-black/90 z-[100] flex items-center justify-center">
+    <div class="max-w-4xl w-full mx-4">
+      <img id="lightboxImage" class="max-h-[80vh] mx-auto rounded-lg">
+      <div class="text-center text-white mt-4">
+        <button onclick="closeLightbox()" class="px-6 py-2 bg-white/20 hover:bg-white/30 rounded-full">Close</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -56,25 +71,37 @@
         const price = parseFloat(item['Regular Price'] || 0);
 
         const card = document.createElement('div');
-        card.className = "bg-white rounded-3xl shadow hover:shadow-xl overflow-hidden";
+        card.className = "bg-white rounded-3xl shadow hover:shadow-xl overflow-hidden cursor-pointer";
         card.innerHTML = `
-          <div class="h-56 bg-gray-100 flex items-center justify-center overflow-hidden relative">
+          <div class="h-64 bg-gray-100 flex items-center justify-center overflow-hidden">
             <img src="images/${sku}.png" 
-                 onerror="this.src='${sku}.png'" 
-                 class="w-full h-full object-cover">
+                 onerror="this.src='https://via.placeholder.com/400x300/eeeeee/999999?text=No+Image+Yet'" 
+                 class="w-full h-full object-contain bg-white">
           </div>
           <div class="p-6">
             <p class="text-xs font-medium text-[#ffa125] uppercase">${item.Category || 'Other'}</p>
             <h3 class="font-semibold text-lg mt-2 mb-3 line-clamp-3">${item.Title}</h3>
             <p class="text-3xl font-bold text-gray-900 mb-6">$${price.toFixed(2)}</p>
-            <button onclick="interested('${sku}', '${item.Title}')" 
+            <button onclick="event.stopImmediatePropagation(); interested('${sku}', '${item.Title}')" 
                     class="w-full bg-gray-900 hover:bg-black text-white py-4 rounded-2xl font-semibold">
               I'm Interested
             </button>
           </div>
         `;
+        card.onclick = () => showLightbox(sku);
         grid.appendChild(card);
       });
+    }
+
+    function showLightbox(sku) {
+      const lightbox = document.getElementById('lightbox');
+      const img = document.getElementById('lightboxImage');
+      img.src = `images/${sku}.png`;
+      lightbox.classList.remove('hidden');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.add('hidden');
     }
 
     function interested(sku, title) {
