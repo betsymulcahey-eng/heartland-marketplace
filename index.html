@@ -23,22 +23,8 @@
     <h1 class="text-5xl font-bold tracking-tight text-gray-900 mb-4">Quality Finds. Local Pickup.</h1>
   </div>
 
-  <div class="bg-[#ffa125] text-white py-8">
-    <div class="max-w-4xl mx-auto px-6 text-center">
-      <p class="text-lg font-medium">Every purchase at VIP Outlet Deals is a win for you <strong>and</strong> helps fund the important work of <strong>Heart Response Ministry</strong>. Shop with a mission.</p>
-    </div>
-  </div>
-
   <div class="max-w-7xl mx-auto px-6 py-8">
-    <div class="flex flex-col md:flex-row gap-4">
-      <input id="searchInput" type="text" placeholder="Search items..." class="flex-1 px-6 py-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#ffa125]">
-      <select id="categoryFilter" class="px-6 py-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#ffa125]">
-        <option value="">All Categories</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="max-w-7xl mx-auto px-6 pb-16">
+    <div id="status" class="text-center py-4 text-gray-500">Loading inventory...</div>
     <div id="productGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
   </div>
 
@@ -46,24 +32,16 @@
     const JSON_URL = "https://script.google.com/macros/s/AKfycbzf7-6TQqzeW2QyI9VfdZ0ehrnus5rnZvu52gnx8Bg0v5U5RVWcL3bmpeSIJOQzGSmC/exec";
 
     async function loadInventory() {
+      const status = document.getElementById('status');
       const grid = document.getElementById('productGrid');
-      grid.innerHTML = '<p class="col-span-full text-center py-12 text-gray-500">Loading inventory...</p>';
+      grid.innerHTML = '';
 
       try {
-        const response = await fetch(JSON_URL);
+        status.textContent = "Fetching data...";
+        const response = await fetch(JSON_URL + "?t=" + new Date().getTime());
         const data = await response.json();
 
-        // Populate category filter
-        const categories = new Set(data.map(item => item.Category).filter(Boolean));
-        const filter = document.getElementById('categoryFilter');
-        Array.from(categories).sort().forEach(cat => {
-          const opt = document.createElement('option');
-          opt.value = cat;
-          opt.textContent = cat;
-          filter.appendChild(opt);
-        });
-
-        grid.innerHTML = '';
+        status.textContent = `Loaded ${data.length} items`;
 
         data.forEach(item => {
           if (!item.SKU || (item.Status !== 'Live' && item.Status !== 'New')) return;
@@ -74,9 +52,8 @@
           const card = document.createElement('div');
           card.className = "bg-white rounded-3xl shadow hover:shadow-xl overflow-hidden";
           card.innerHTML = `
-            <div class="h-56 bg-gray-100 flex items-center justify-center overflow-hidden relative">
-              <img src="images/${sku}.png" onerror="this.style.display='none'" class="w-full h-full object-cover">
-              <div class="absolute inset-0 flex items-center justify-center text-gray-400 text-sm" style="display:none">No image yet</div>
+            <div class="h-56 bg-gray-100 flex items-center justify-center overflow-hidden">
+              <img src="images/${sku}.png" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'" class="w-full h-full object-cover">
             </div>
             <div class="p-6">
               <p class="text-xs font-medium text-[#ffa125] uppercase">${item.Category || 'Other'}</p>
@@ -91,7 +68,8 @@
           grid.appendChild(card);
         });
       } catch (e) {
-        grid.innerHTML = '<p class="col-span-full text-center py-12 text-red-500">Error loading data. Please refresh.</p>';
+        status.innerHTML = `<span class="text-red-500">Error: ${e.message}</span>`;
+        console.error(e);
       }
     }
 
