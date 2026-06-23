@@ -43,18 +43,25 @@
   </div>
 
   <script>
-    const JSON_URL = "https://script.google.com/macros/s/AKfycbzf7-6TQqzeW2QyI9VfdZ0ehrnus5rnZvu52gnx8Bg0v5U5RVWcL3bmpeSIJOQzGSmC/exec";
+    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQPXYpbeoPGUucM-ztzc19S0iUHZmfAiHR-BDq-Czmfc5FU2RRheHth7ChElIYqBcKwobhzSwwe1TGi/pub?output=csv";
 
     async function loadInventory() {
       const grid = document.getElementById('productGrid');
       grid.innerHTML = '<p class="col-span-full text-center py-12 text-gray-500">Loading inventory...</p>';
 
       try {
-        const response = await fetch(JSON_URL);
-        const data = await response.json();
+        const response = await fetch(SHEET_URL);
+        const text = await response.text();
+        const rows = parseCSV(text);
+        
+        const headers = rows[0];
+        const data = rows.slice(1);
 
-        // Populate category filter
-        const categories = new Set(data.map(item => item.Category).filter(Boolean));
+        const categories = new Set();
+        data.forEach(row => {
+          const cat = row[headers.indexOf("Category")] || "";
+          if (cat) categories.add(cat);
+        });
         const filter = document.getElementById('categoryFilter');
         Array.from(categories).sort().forEach(cat => {
           const opt = document.createElement('option');
@@ -65,22 +72,27 @@
 
         grid.innerHTML = '';
 
-        data.forEach(item => {
+        data.forEach(row => {
+          const item = {};
+          headers.forEach((h, i) => item[h] = row[i] || '');
+
           if (!item.SKU || (item.Status !== 'Live' && item.Status !== 'New')) return;
 
           const price = parseFloat(item['Regular Price'] || 0);
+          const sku = item.SKU.trim();
 
           const card = document.createElement('div');
           card.className = "bg-white rounded-3xl shadow hover:shadow-xl overflow-hidden";
           card.innerHTML = `
-            <div class="h-56 bg-gray-100 flex items-center justify-center overflow-hidden">
-              ${item['Image URL'] ? `<img src="${item['Image URL']}" class="w-full h-full object-cover">` : '<div class="text-gray-400">No image yet</div>'}
+            <div class="h-56 bg-gray-100 flex items-center justify-center overflow-hidden relative">
+              <img src="images/${sku}.png" onerror="this.style.display='none'" class="w-full h-full object-cover">
+              <div class="absolute inset-0 flex items-center justify-center text-gray-400 text-sm" style="display:none">No image yet</div>
             </div>
             <div class="p-6">
               <p class="text-xs font-medium text-[#ffa125] uppercase">${item.Category || 'Other'}</p>
               <h3 class="font-semibold text-lg mt-2 mb-3 line-clamp-3">${item.Title}</h3>
               <p class="text-3xl font-bold text-gray-900 mb-6">$${price.toFixed(2)}</p>
-              <button onclick="interested('${item.SKU}', '${item.Title}')" 
+              <button onclick="interested('${sku}', '${item.Title}')" 
                       class="w-full bg-gray-900 hover:bg-black text-white py-4 rounded-2xl font-semibold">
                 I'm Interested
               </button>
@@ -89,8 +101,30 @@
           grid.appendChild(card);
         });
       } catch (e) {
-        grid.innerHTML = '<p class="col-span-full text-center py-12 text-red-500">Error loading data. Please refresh.</p>';
+        grid.innerHTML = '<p class="col-span-full text-center py-12 text-red-500">Error loading data.</p>';
       }
+    }
+
+    function parseCSV(text) {
+      const lines = text.split('\n');
+      const result = [];
+      for (let line of lines) {
+        if (!line.trim()) continue;
+        const row = [];
+        let current = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          if (char === '"') inQuotes = !inQuotes;
+          else if (char === ',' && !inQuotes) {
+            row.push(current);
+            current = '';
+          } else current += char;
+        }
+        row.push(current);
+        result.push(row);
+      }
+      return result;
     }
 
     function interested(sku, title) {
