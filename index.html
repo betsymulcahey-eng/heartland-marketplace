@@ -31,8 +31,7 @@
 
   <div class="max-w-7xl mx-auto px-6 py-8">
     <div class="flex flex-col md:flex-row gap-4">
-      <input id="searchInput" type="text" placeholder="Search items..." 
-             class="flex-1 px-6 py-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#ffa125]">
+      <input id="searchInput" type="text" placeholder="Search items..." class="flex-1 px-6 py-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#ffa125]">
       <select id="categoryFilter" class="px-6 py-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#ffa125]">
         <option value="">All Categories</option>
       </select>
@@ -44,26 +43,18 @@
   </div>
 
   <script>
-    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQPXYpbeoPGUucM-ztzc19S0iUHZmfAiHR-BDq-Czmfc5FU2RRheHth7ChElIYqBcKwobhzSwwe1TGi/pub?output=csv";
+    const JSON_URL = "https://script.google.com/macros/s/AKfycbzf7-6TQqzeW2QyI9VfdZ0ehrnus5rnZvu52gnx8Bg0v5U5RVWcL3bmpeSIJOQzGSmC/exec";
 
     async function loadInventory() {
       const grid = document.getElementById('productGrid');
       grid.innerHTML = '<p class="col-span-full text-center py-12 text-gray-500">Loading inventory...</p>';
 
       try {
-        const response = await fetch(SHEET_URL);
-        const text = await response.text();
-        const rows = parseCSV(text);
-        
-        const headers = rows[0];
-        const data = rows.slice(1);
+        const response = await fetch(JSON_URL);
+        const data = await response.json();
 
-        // Populate categories
-        const categories = new Set();
-        data.forEach(row => {
-          const cat = row[headers.indexOf("Category")] || "";
-          if (cat) categories.add(cat);
-        });
+        // Populate category filter
+        const categories = new Set(data.map(item => item.Category).filter(Boolean));
         const filter = document.getElementById('categoryFilter');
         Array.from(categories).sort().forEach(cat => {
           const opt = document.createElement('option');
@@ -74,10 +65,7 @@
 
         grid.innerHTML = '';
 
-        data.forEach(row => {
-          const item = {};
-          headers.forEach((h, i) => item[h] = row[i] || '');
-
+        data.forEach(item => {
           if (!item.SKU || (item.Status !== 'Live' && item.Status !== 'New')) return;
 
           const price = parseFloat(item['Regular Price'] || 0);
@@ -101,38 +89,12 @@
           grid.appendChild(card);
         });
       } catch (e) {
-        grid.innerHTML = '<p class="col-span-full text-center py-12 text-red-500">Error loading data. Please refresh the page.</p>';
+        grid.innerHTML = '<p class="col-span-full text-center py-12 text-red-500">Error loading data. Please refresh.</p>';
       }
-    }
-
-    // Robust CSV parser
-    function parseCSV(text) {
-      const lines = text.split('\n');
-      const result = [];
-      for (let line of lines) {
-        if (!line.trim()) continue;
-        const row = [];
-        let current = '';
-        let inQuotes = false;
-        for (let i = 0; i < line.length; i++) {
-          const char = line[i];
-          if (char === '"') {
-            inQuotes = !inQuotes;
-          } else if (char === ',' && !inQuotes) {
-            row.push(current);
-            current = '';
-          } else {
-            current += char;
-          }
-        }
-        row.push(current);
-        result.push(row);
-      }
-      return result;
     }
 
     function interested(sku, title) {
-      alert(`Interested in: ${title}\n\nWe'll send you an invoice shortly for SKU ${sku}.`);
+      alert(`Interested in: ${title}\n\nWe'll send you an invoice for SKU ${sku}.`);
     }
 
     loadInventory();
