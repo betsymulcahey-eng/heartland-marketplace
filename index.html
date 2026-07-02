@@ -7,10 +7,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="icon" href="logovip.png"  type="image/png">
+  <link rel="icon" href="logovip.png" type="image/png">
 </head>
 <body class="bg-gray-50 font-sans">
-  <!-- Header and Hero same as before -->
   <header class="bg-white border-b sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
       <div class="flex items-center gap-4">
@@ -64,42 +63,45 @@
     emailjs.init("QLVByNfZS7_OqeChN");
 
     const JSON_URL = "https://script.google.com/macros/s/AKfycbzf7-6TQqzeW2QyI9VfdZ0ehrnus5rnZvu52gnx8Bg0v5U5RVWcL3bmpeSIJOQzGSmC/exec";
-
     let currentItem = {};
 
     async function loadInventory() {
       const grid = document.getElementById('productGrid');
       grid.innerHTML = '<p class="col-span-full text-center py-12 text-gray-500">Loading inventory...</p>';
 
-      const response = await fetch(JSON_URL);
-      const data = await response.json();
+      try {
+        const response = await fetch(JSON_URL);
+        const data = await response.json();
 
-      grid.innerHTML = '';
+        grid.innerHTML = '';
 
-      data.forEach(item => {
-        const sku = (item.SKU || "").toString().trim();
-        if (!sku || (item.Status !== 'Live' && item.Status !== 'New')) return;
+        data.forEach(item => {
+          const sku = (item.SKU || "").toString().trim();
+          if (!sku || (item.Status !== 'Live' && item.Status !== 'New')) return;
 
-        const price = parseFloat(item['Regular Price'] || 0);
+          const price = parseFloat(item['Regular Price'] || 0);
 
-        const card = document.createElement('div');
-        card.className = "bg-white rounded-3xl shadow hover:shadow-xl overflow-hidden cursor-pointer";
-        card.innerHTML = `
-          <div class="h-64 bg-gray-100 flex items-center justify-center overflow-hidden">
-            <img src="images/${sku}.png" onerror="this.src='https://via.placeholder.com/400x300/eeeeee/999999?text=No+Image+Yet'" class="w-full h-full object-contain">
-          </div>
-          <div class="p-6">
-            <p class="text-xs font-medium text-[#ffa125] uppercase">${item.Category || 'Other'}</p>
-            <h3 class="font-semibold text-lg mt-2 mb-3 line-clamp-3">${item.Title}</h3>
-            <p class="text-3xl font-bold text-gray-900 mb-6">$${price.toFixed(2)}</p>
-            <button onclick="event.stopImmediatePropagation(); openInterestModal('${sku}', '${item.Title}', ${price})" 
-                    class="w-full bg-gray-900 hover:bg-black text-white py-4 rounded-2xl font-semibold">
-              I'm Interested
-            </button>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
+          const card = document.createElement('div');
+          card.className = "bg-white rounded-3xl shadow hover:shadow-xl overflow-hidden cursor-pointer";
+          card.innerHTML = `
+            <div class="h-64 bg-gray-100 flex items-center justify-center overflow-hidden">
+              <img src="images/${sku}.png" onerror="this.src='https://via.placeholder.com/400x300/eeeeee/999999?text=No+Image+Yet'" class="w-full h-full object-contain">
+            </div>
+            <div class="p-6">
+              <p class="text-xs font-medium text-[#ffa125] uppercase">${item.Category || 'Other'}</p>
+              <h3 class="font-semibold text-lg mt-2 mb-3 line-clamp-3">${item.Title}</h3>
+              <p class="text-3xl font-bold text-gray-900 mb-6">$${price.toFixed(2)}</p>
+              <button onclick="event.stopImmediatePropagation(); openInterestModal('${sku}', '${item.Title}', ${price})" 
+                      class="w-full bg-gray-900 hover:bg-black text-white py-4 rounded-2xl font-semibold">
+                I'm Interested
+              </button>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+      } catch (e) {
+        grid.innerHTML = '<p class="col-span-full text-center py-12 text-red-500">Error loading data. Please refresh.</p>';
+      }
     }
 
     function openInterestModal(sku, title, price) {
@@ -132,7 +134,7 @@
         alert("Request sent! We'll contact you shortly.");
         closeModal();
       }).catch(() => {
-        alert("There was an error sending your request. Please try again.");
+        alert("There was an error. Please try again.");
       });
     }
 
