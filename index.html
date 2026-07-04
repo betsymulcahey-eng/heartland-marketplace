@@ -23,7 +23,7 @@
         <span class="text-2xl font-bold tracking-tighter text-gray-900">VIP Outlet Deals</span>
       </div>
       <div class="flex items-center gap-4">
-        <button onclick="window.open('YOUR_MAILERLITE_FORM_URL_HERE', '_blank')"
+        <button onclick="window.open('https://preview.mailerlite.io/forms/2465440/191276452992255999/share', '_blank')"
                 class="px-5 py-2.5 rounded-2xl bg-white border border-gray-300 hover:bg-gray-100 font-semibold text-sm flex items-center gap-2">
           <i class="fa-solid fa-envelope"></i>
           <span>Subscribe for Deals</span>
@@ -66,6 +66,7 @@
     </div>
     <div id="errorState" class="hidden text-center py-12 text-red-500">
       <p>Couldn't load listings right now. Please refresh the page.</p>
+      <p id="errorDetail" class="text-xs mt-2 text-red-400"></p>
     </div>
   </div>
 
@@ -127,8 +128,8 @@
   </div>
 
   <script>
-    // ============ CONFIG - UPDATE THESE ============
-    const DATA_URL = 'https://script.google.com/macros/s/AKfycbxcxh0lY4aOmIFm5TNkSe_O98APypBE5fV4sFCadZ1KpLG044WLClgmZCItjoZ7VYA/exec'; // ←←← REPLACE WITH YOUR LATEST /exec URL
+    // ============ CONFIG - YOUR REAL URL ============
+    const DATA_URL = 'https://script.google.com/macros/s/AKfycbxcxh0lY4aOmIFm5TNkSe_O98APypBE5fV4sFCadZ1KpLG044WLClgmZCItjoZ7VYA/exec';
     const EMAILJS_SERVICE = 'service_hcctwtc';
     const EMAILJS_TEMPLATE = 'template_28nbhy2';
     const EMAILJS_PUBLIC_KEY = 'QLVByNfZS7_OqeChN';
@@ -136,31 +137,57 @@
     let allListings = [];
     let currentItem = null;
 
-    // Tailwind script
     function initTailwind() {
       document.documentElement.style.setProperty('--accent', '#ffa125');
     }
 
-    // Load inventory from Google Apps Script
     async function loadInventory() {
       const grid = document.getElementById('listingsGrid');
       const loading = document.getElementById('loadingState');
       const error = document.getElementById('errorState');
+      const errorDetail = document.getElementById('errorDetail');
 
       loading.classList.remove('hidden');
       grid.innerHTML = '';
       error.classList.add('hidden');
+      if (errorDetail) errorDetail.textContent = '';
 
       try {
-        const res = await fetch(DATA_URL);
-        if (!res.ok) throw new Error('Network response was not ok');
-
-        const data = await res.json();
+        console.log('Fetching from:', DATA_URL);
+        const res = await fetch(DATA_URL, { 
+          method: 'GET',
+          redirect: 'follow'
+        });
         
+        console.log('Response status:', res.status);
+        
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+
+        const text = await res.text();
+        console.log('Raw response (first 500 chars):', text.substring(0, 500));
+        
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (parseErr) {
+          console.error('JSON parse failed:', parseErr);
+          throw new Error('Server did not return valid JSON. Check Apps Script deployment.');
+        }
+
+        console.log('Parsed data length:', Array.isArray(data) ? data.length : 'not an array');
+        
+        if (!Array.isArray(data)) {
+          throw new Error('Data is not an array. Check getWebsiteData() function.');
+        }
+
         // Filter to only show Available Now or Coming Soon
         allListings = data.filter(item => 
-          item.Status === 'Available Now' || item.Status === 'Coming Soon'
+          item && (item.Status === 'Available Now' || item.Status === 'Coming Soon')
         );
+
+        console.log('Filtered listings count:', allListings.length);
 
         if (allListings.length === 0) {
           grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500">No items available right now. Check back soon!</div>`;
@@ -169,8 +196,11 @@
           populateCategoryFilter(allListings);
         }
       } catch (err) {
-        console.error(err);
+        console.error('Load inventory error:', err);
         error.classList.remove('hidden');
+        if (errorDetail) {
+          errorDetail.textContent = err.message;
+        }
       } finally {
         loading.classList.add('hidden');
       }
@@ -265,7 +295,6 @@
       renderListings(filtered);
     }
 
-    // Modal functions
     function openInterestModal(sku, title, price) {
       currentItem = { sku, title, price };
       document.getElementById('modalItemTitle').textContent = title;
@@ -304,17 +333,11 @@
       });
     }
 
-    // Initialize everything
     function init() {
       initTailwind();
-      
-      // Initialize EmailJS
       emailjs.init(EMAILJS_PUBLIC_KEY);
-
-      // Load listings
       loadInventory();
 
-      // Allow closing modal with Escape key
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
           const modal = document.getElementById('interestModal');
