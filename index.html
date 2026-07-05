@@ -101,7 +101,10 @@
   <!-- I'm Interested Modal -->
   <div id="interestModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-[100]">
     <div class="bg-white rounded-3xl max-w-md w-full mx-4 p-8">
-      <h3 class="text-2xl font-bold mb-1">Interested in this item?</h3>
+      <div class="flex items-center gap-3 mb-2">
+        <h3 class="text-2xl font-bold">Interested in this item?</h3>
+        <span id="modalStatusBadge" class="hidden text-xs font-bold px-3 py-1 rounded-full"></span>
+      </div>
       <p id="modalItemTitle" class="text-gray-600 mb-6 text-sm"></p>
 
       <div class="space-y-4">
@@ -116,10 +119,12 @@
       </div>
 
       <div class="flex gap-3 mt-6">
-        <button onclick="closeModal()" class="flex-1 py-3.5 rounded-2xl border border-gray-300 font-semibold">Cancel</button>
-        <button onclick="submitInterest()" class="flex-1 py-3.5 rounded-2xl bg-gray-900 hover:bg-black text-white font-semibold">Send Request</button>
+        <button onclick="closeModal()" 
+                class="flex-1 py-3.5 rounded-2xl border border-gray-300 font-semibold">Cancel</button>
+        <button onclick="submitInterest()" 
+                class="flex-1 py-3.5 rounded-2xl bg-gray-900 hover:bg-black text-white font-semibold">Send Request</button>
       </div>
-      <p class="text-[10px] text-center text-gray-400 mt-4">We’ll text or call you shortly to confirm availability and send an invoice.</p>
+      <p class="text-[10px] text-center text-gray-400 mt-4">We'll text or call you shortly to confirm availability and send an invoice.</p>
     </div>
   </div>
 
@@ -228,7 +233,7 @@
                 ${item.Qty ? `<span class="text-xs text-gray-500">${item.Qty} available</span>` : ''}
               </div>
 
-              <button onclick="openInterestModal('${sku}', '${(item.Description || '').replace(/'/g, "\\'")}', ${price})"
+              <button onclick="openInterestModal('${sku}', '${(item.Description || '').replace(/'/g, "\\'")}', ${price}, '${item.Status}')"
                       class="w-full bg-gray-900 hover:bg-black active:bg-black transition-colors text-white py-3.5 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2">
                 <i class="fa-solid fa-comment-dots"></i>
                 <span>I'm Interested</span>
@@ -272,9 +277,20 @@
       renderListings(filtered);
     }
 
-    function openInterestModal(sku, title, price) {
-      currentItem = { sku, title, price };
+    function openInterestModal(sku, title, price, status) {
+      currentItem = { sku, title, price, status };
       document.getElementById('modalItemTitle').textContent = title;
+
+      // Show status badge in modal
+      const badge = document.getElementById('modalStatusBadge');
+      if (status === 'Coming Soon') {
+        badge.textContent = 'COMING SOON - WAITLIST';
+        badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-amber-500 text-white';
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+
       document.getElementById('interestModal').classList.remove('hidden');
       document.getElementById('customerName').focus();
     }
@@ -296,11 +312,12 @@
         item_title: currentItem.title,
         sku: currentItem.sku,
         price: currentItem.price.toFixed(2),
+        item_status: currentItem.status,           // ← Status is now sent
         customer_name: name,
         customer_phone: phone,
         date: new Date().toLocaleString()
       }).then(() => {
-        alert("Request sent! We'll contact you shortly to confirm stock and send an invoice.");
+        alert("Request sent! We'll contact you shortly.");
         closeModal();
         document.getElementById('customerName').value = '';
         document.getElementById('customerPhone').value = '';
