@@ -9,8 +9,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="icon" href="logovip.png" type="image/png">
   <style>
-    .orange { color: #ffa125; }
-    .bg-orange { background-color: #ffa125; }
     .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); }
   </style>
 </head>
@@ -66,7 +64,6 @@
     </div>
     <div id="errorState" class="hidden text-center py-12 text-red-500">
       <p>Couldn't load listings right now. Please refresh the page.</p>
-      <p id="errorDetail" class="text-xs mt-2 text-red-400"></p>
     </div>
   </div>
 
@@ -118,17 +115,15 @@
       </div>
 
       <div class="flex gap-3 mt-6">
-        <button onclick="closeModal()" 
-                class="flex-1 py-3.5 rounded-2xl border border-gray-300 font-semibold">Cancel</button>
-        <button onclick="submitInterest()" 
-                class="flex-1 py-3.5 rounded-2xl bg-gray-900 hover:bg-black text-white font-semibold">Send Request</button>
+        <button onclick="closeModal()" class="flex-1 py-3.5 rounded-2xl border border-gray-300 font-semibold">Cancel</button>
+        <button onclick="submitInterest()" class="flex-1 py-3.5 rounded-2xl bg-gray-900 hover:bg-black text-white font-semibold">Send Request</button>
       </div>
       <p class="text-[10px] text-center text-gray-400 mt-4">We’ll text or call you shortly to confirm availability and send an invoice.</p>
     </div>
   </div>
 
   <script>
-    // ============ CONFIG - CORRECT URL ============
+    // ============ CONFIG - YOUR PUBLISHED CSV URL ============
     const DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQPXYpbeoPGUucM-ztzc19S0iUHZmfAiHR-BDq-Czmfc5FU2RRheHth7ChElIYqBcKwobhzSwwe1TGi/pub?gid=740116708&single=true&output=csv';
     const EMAILJS_SERVICE = 'service_hcctwtc';
     const EMAILJS_TEMPLATE = 'template_28nbhy2';
@@ -137,42 +132,58 @@
     let allListings = [];
     let currentItem = null;
 
-    function initTailwind() {
-      document.documentElement.style.setProperty('--accent', '#ffa125');
-    }
-
     async function loadInventory() {
       const grid = document.getElementById('listingsGrid');
       const loading = document.getElementById('loadingState');
       const error = document.getElementById('errorState');
-      const errorDetail = document.getElementById('errorDetail');
 
       loading.classList.remove('hidden');
       grid.innerHTML = '';
       error.classList.add('hidden');
-      if (errorDetail) errorDetail.textContent = '';
 
       try {
-        const res = await fetch(DATA_URL, { method: 'GET', redirect: 'follow' });
-        
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
+        const res = await fetch(DATA_URL);
+        if (!res.ok) throw new Error('Failed to load data');
 
         const text = await res.text();
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch (parseErr) {
-          throw new Error('Server did not return valid JSON. Check Apps Script deployment.');
-        }
+        const rows = text.trim().split('\n').map(row => {
+          const result = [];
+          let current = '';
+          let inQuotes = false;
+          for (let i = 0; i < row.length; i++) {
+            const char = row[i];
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+              result.push(current.trim());
+              current = '';
+            } else {
+              current += char;
+            }
+          }
+          result.push(current.trim());
+          return result;
+        });
 
-        if (!Array.isArray(data)) {
-          throw new Error('Data is not an array. Check getWebsiteData() function.');
-        }
+        if (rows.length < 2) throw new Error('No data rows found');
 
-        allListings = data.filter(item => 
-          item && (item.Status === 'Available Now' || item.Status === 'Coming Soon')
+        const headers = rows[0];
+        const dataRows = rows.slice(1);
+
+        const colMap = {};
+        headers.forEach((h, i) => colMap[h.trim()] = i);
+
+        allListings = dataRows.map(row => ({
+          SKU: (row[colMap['SKU']] || '').replace(/"/g, '').trim(),
+          Description: (row[colMap['Description']] || '').replace(/"/g, '').trim(),
+          Category: (row[colMap['Category']] || '').replace(/"/g, '').trim(),
+          Square_Price: parseFloat((row[colMap['Square_Price']] || '0').replace(/"/g, '').replace(/[^0-9.]/g, '')) || 0,
+          Qty: parseInt((row[colMap['Qty']] || '0').replace(/"/g, '')) || 0,
+          Status: (row[colMap['Status']] || 'Coming Soon').replace(/"/g, '').trim()
+        })).filter(item => 
+          item.SKU && 
+          item.Square_Price > 0 &&
+          (item.Status === 'Available Now' || item.Status === 'Coming Soon')
         );
 
         if (allListings.length === 0) {
@@ -182,11 +193,8 @@
           populateCategoryFilter(allListings);
         }
       } catch (err) {
-        console.error('Load inventory error:', err);
+        console.error(err);
         error.classList.remove('hidden');
-        if (errorDetail) {
-          errorDetail.textContent = err.message;
-        }
       } finally {
         loading.classList.add('hidden');
       }
@@ -320,7 +328,6 @@
     }
 
     function init() {
-      initTailwind();
       emailjs.init(EMAILJS_PUBLIC_KEY);
       loadInventory();
 
