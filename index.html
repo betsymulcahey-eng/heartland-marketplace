@@ -168,17 +168,17 @@
     let currentItem = null;
 
     async function loadInventory() {
-      const loading = document.getElementById('loadingState');
-      const error = document.getElementById('errorState');
+      const availableGrid = document.getElementById('availableGrid');
+      const comingSoonGrid = document.getElementById('comingSoonGrid');
+      const errorDiv = document.getElementById('errorState'); // optional
 
-      loading.classList.remove('hidden');
-      document.getElementById('availableGrid').innerHTML = '';
-      document.getElementById('comingSoonGrid').innerHTML = '';
-      error.classList.add('hidden');
+      if (availableGrid) availableGrid.innerHTML = '';
+      if (comingSoonGrid) comingSoonGrid.innerHTML = '';
+      if (errorDiv) errorDiv.classList.add('hidden');
 
       try {
         const res = await fetch(DATA_URL);
-        if (!res.ok) throw new Error('Failed to load data');
+        if (!res.ok) throw new Error('Failed to load data from Google Sheets');
 
         const csvText = await res.text();
 
@@ -198,19 +198,42 @@
               .filter(item => item.SKU && item.Square_Price > 0);
 
             renderAllListings(allListings);
+            populateCategoryFilter(allListings);
           }
         });
       } catch (err) {
         console.error(err);
-        error.classList.remove('hidden');
-      } finally {
-        loading.classList.add('hidden');
+        if (errorDiv) {
+          errorDiv.classList.remove('hidden');
+        } else if (availableGrid) {
+          availableGrid.innerHTML = `<div class="col-span-full text-red-500 py-6">Error loading listings. Please refresh the page.</div>`;
+        }
       }
+    }
+
+    function populateCategoryFilter(listings) {
+      const select = document.getElementById('categoryFilter');
+      if (!select) return;
+
+      const categories = [...new Set(listings.map(item => item.Category).filter(Boolean))].sort();
+      
+      // Keep the "All Categories" option and add the rest
+      select.innerHTML = '<option value="">All Categories</option>';
+      categories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat;
+        option.textContent = cat;
+        select.appendChild(option);
+      });
     }
 
     function renderAllListings(listings) {
       const availableGrid = document.getElementById('availableGrid');
       const comingSoonGrid = document.getElementById('comingSoonGrid');
+      const availableCount = document.getElementById('availableCount');
+      const comingSoonCount = document.getElementById('comingSoonCount');
+
+      if (!availableGrid || !comingSoonGrid) return;
 
       availableGrid.innerHTML = '';
       comingSoonGrid.innerHTML = '';
@@ -225,11 +248,11 @@
         return s.includes('coming') || s.includes('soon') || s.includes('waitlist');
       });
 
-      document.getElementById('availableCount').textContent = `${available.length} items`;
-      document.getElementById('comingSoonCount').textContent = `${comingSoon.length} items`;
+      if (availableCount) availableCount.textContent = `${available.length} items`;
+      if (comingSoonCount) comingSoonCount.textContent = `${comingSoon.length} items`;
 
       if (available.length === 0) {
-        availableGrid.innerHTML = `<div class="col-span-full text-gray-500 py-6">No items currently available.</div>`;
+        availableGrid.innerHTML = `<div class="col-span-full text-gray-500 py-6">No items currently available right now.</div>`;
       } else {
         available.forEach(item => availableGrid.appendChild(createCard(item)));
       }
@@ -244,7 +267,8 @@
     function createCard(item) {
       const sku = String(item.SKU || '').trim();
       const price = parseFloat(item.Square_Price) || 0;
-      const isComingSoon = item.Status.toLowerCase().includes('coming') || item.Status.toLowerCase().includes('soon') || item.Status.toLowerCase().includes('waitlist');
+      const statusLower = item.Status.toLowerCase();
+      const isComingSoon = statusLower.includes('coming') || statusLower.includes('soon') || statusLower.includes('waitlist');
 
       const card = document.createElement('div');
       card.className = `bg-white rounded-3xl overflow-hidden border border-gray-200 card-hover flex flex-col`;
@@ -296,7 +320,7 @@
     }
 
     function filterListings() {
-      const search = document.getElementById('searchInput').value.toLowerCase();
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
       const category = document.getElementById('categoryFilter').value;
 
       const filtered = allListings.filter(item => {
@@ -313,24 +337,30 @@
     }
 
     function openInterestModal(sku, title, price, status) {
-      currentItem = { sku, title, price, status };
+      currentItem = { sku, title, price, status: status || 'Coming Soon' };
       document.getElementById('modalItemTitle').textContent = title;
 
       const badge = document.getElementById('modalStatusBadge');
-      if (status.toLowerCase().includes('coming soon') || status.toLowerCase().includes('waitlist')) {
-        badge.textContent = 'COMING SOON - WAITLIST';
-        badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-amber-500 text-white';
-        badge.classList.remove('hidden');
-      } else {
-        badge.classList.add('hidden');
+      if (badge) {
+        if (status && (status.toLowerCase().includes('coming') || status.toLowerCase().includes('waitlist'))) {
+          badge.textContent = 'COMING SOON - WAITLIST';
+          badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-amber-500 text-white';
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
       }
 
-      document.getElementById('interestModal').classList.remove('hidden');
-      document.getElementById('customerName').focus();
+      const modal = document.getElementById('interestModal');
+      if (modal) modal.classList.remove('hidden');
+      
+      const nameInput = document.getElementById('customerName');
+      if (nameInput) nameInput.focus();
     }
 
     function closeModal() {
-      document.getElementById('interestModal').classList.add('hidden');
+      const modal = document.getElementById('interestModal');
+      if (modal) modal.classList.add('hidden');
     }
 
     function submitInterest() {
@@ -368,7 +398,7 @@
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
           const modal = document.getElementById('interestModal');
-          if (!modal.classList.contains('hidden')) closeModal();
+          if (modal && !modal.classList.contains('hidden')) closeModal();
         }
       });
     }
