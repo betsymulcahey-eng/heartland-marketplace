@@ -278,10 +278,15 @@
     }
 
     function openInterestModal(sku, title, price, status) {
-      currentItem = { sku, title, price, status };
+      currentItem = { 
+        sku: sku, 
+        title: title, 
+        price: price, 
+        status: status || 'Coming Soon'
+      };
+
       document.getElementById('modalItemTitle').textContent = title;
 
-      // Show status badge in modal
       const badge = document.getElementById('modalStatusBadge');
       if (status === 'Coming Soon') {
         badge.textContent = 'COMING SOON - WAITLIST';
@@ -312,7 +317,7 @@
         item_title: currentItem.title,
         sku: currentItem.sku,
         price: currentItem.price.toFixed(2),
-        item_status: currentItem.status,           // ← Status is now sent
+        item_status: currentItem.status || 'Coming Soon',
         customer_name: name,
         customer_phone: phone,
         date: new Date().toLocaleString()
