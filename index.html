@@ -215,7 +215,6 @@
       availableGrid.innerHTML = '';
       comingSoonGrid.innerHTML = '';
 
-      // Very flexible status matching
       const available = listings.filter(item => {
         const s = item.Status.toLowerCase();
         return s.includes('available') || s === '' || s === 'in stock';
@@ -245,9 +244,7 @@
     function createCard(item) {
       const sku = String(item.SKU || '').trim();
       const price = parseFloat(item.Square_Price) || 0;
-      const isComingSoon = item.Status.toLowerCase().includes('coming') || 
-                           item.Status.toLowerCase().includes('soon') || 
-                           item.Status.toLowerCase().includes('waitlist');
+      const isComingSoon = item.Status.toLowerCase().includes('coming') || item.Status.toLowerCase().includes('soon') || item.Status.toLowerCase().includes('waitlist');
 
       const card = document.createElement('div');
       card.className = `bg-white rounded-3xl overflow-hidden border border-gray-200 card-hover flex flex-col`;
