@@ -54,7 +54,7 @@
     </div>
   </div>
 
-  <!-- Listings Container -->
+  <!-- Listings Sections -->
   <div class="max-w-7xl mx-auto px-6 pb-16 space-y-12">
 
     <!-- Available Now Section -->
@@ -63,9 +63,7 @@
         <h2 class="text-2xl font-bold text-gray-900">Available Now</h2>
         <span id="availableCount" class="text-sm font-medium px-3 py-1 bg-green-100 text-green-700 rounded-full"></span>
       </div>
-      <div id="availableGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <!-- Populated by JS -->
-      </div>
+      <div id="availableGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
     </div>
 
     <!-- Coming Soon Section -->
@@ -74,9 +72,7 @@
         <h2 class="text-2xl font-bold text-gray-900">Coming Soon (Waitlist)</h2>
         <span id="comingSoonCount" class="text-sm font-medium px-3 py-1 bg-amber-100 text-amber-700 rounded-full"></span>
       </div>
-      <div id="comingSoonGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <!-- Populated by JS -->
-      </div>
+      <div id="comingSoonGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
     </div>
 
   </div>
@@ -140,7 +136,6 @@
   </div>
 
   <script>
-    // ============ CONFIG ============
     const DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQPXYpbeoPGUucM-ztzc19S0iUHZmfAiHR-BDq-Czmfc5FU2RRheHth7ChElIYqBcKwobhzSwwe1TGi/pub?gid=740116708&single=true&output=csv';
     const EMAILJS_SERVICE = 'service_hcctwtc';
     const EMAILJS_TEMPLATE = 'template_28nbhy2';
@@ -175,7 +170,7 @@
                 Category: (row.Category || '').trim(),
                 Square_Price: parseFloat(row.Square_Price) || 0,
                 Qty: parseInt(row.Qty) || 0,
-                Status: (row.Status || 'Coming Soon').trim()
+                Status: (row.Status || '').trim()
               }))
               .filter(item => item.SKU && item.Square_Price > 0);
 
@@ -197,10 +192,17 @@
       availableGrid.innerHTML = '';
       comingSoonGrid.innerHTML = '';
 
-      const available = listings.filter(item => item.Status === 'Available Now');
-      const comingSoon = listings.filter(item => item.Status === 'Coming Soon');
+      // More flexible status matching
+      const available = listings.filter(item => {
+        const status = item.Status.toLowerCase();
+        return status === 'available now' || status === 'available';
+      });
 
-      // Update counts
+      const comingSoon = listings.filter(item => {
+        const status = item.Status.toLowerCase();
+        return status === 'coming soon' || status === 'waitlist';
+      });
+
       document.getElementById('availableCount').textContent = `${available.length} items`;
       document.getElementById('comingSoonCount').textContent = `${comingSoon.length} items`;
 
@@ -220,7 +222,7 @@
     function createCard(item) {
       const sku = String(item.SKU || '').trim();
       const price = parseFloat(item.Square_Price) || 0;
-      const isComingSoon = item.Status === 'Coming Soon';
+      const isComingSoon = item.Status.toLowerCase().includes('coming soon') || item.Status.toLowerCase().includes('waitlist');
 
       const card = document.createElement('div');
       card.className = `bg-white rounded-3xl overflow-hidden border border-gray-200 card-hover flex flex-col`;
@@ -293,7 +295,7 @@
       document.getElementById('modalItemTitle').textContent = title;
 
       const badge = document.getElementById('modalStatusBadge');
-      if (status === 'Coming Soon') {
+      if (status.toLowerCase().includes('coming soon')) {
         badge.textContent = 'COMING SOON - WAITLIST';
         badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-amber-500 text-white';
         badge.classList.remove('hidden');
