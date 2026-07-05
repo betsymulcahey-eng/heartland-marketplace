@@ -6,6 +6,7 @@
   <title>VIP Outlet Deals | Shakopee, MN</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="icon" href="logovip.png" type="image/png">
   <style>
@@ -123,7 +124,7 @@
   </div>
 
   <script>
-    // ============ CONFIG - YOUR PUBLISHED CSV URL ============
+    // ============ CONFIG ============
     const DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQPXYpbeoPGUucM-ztzc19S0iUHZmfAiHR-BDq-Czmfc5FU2RRheHth7ChElIYqBcKwobhzSwwe1TGi/pub?gid=740116708&single=true&output=csv';
     const EMAILJS_SERVICE = 'service_hcctwtc';
     const EMAILJS_TEMPLATE = 'template_28nbhy2';
@@ -145,53 +146,35 @@
         const res = await fetch(DATA_URL);
         if (!res.ok) throw new Error('Failed to load data');
 
-        const text = await res.text();
-        const rows = text.trim().split('\n').map(row => {
-          const result = [];
-          let current = '';
-          let inQuotes = false;
-          for (let i = 0; i < row.length; i++) {
-            const char = row[i];
-            if (char === '"') {
-              inQuotes = !inQuotes;
-            } else if (char === ',' && !inQuotes) {
-              result.push(current.trim());
-              current = '';
+        const csvText = await res.text();
+
+        Papa.parse(csvText, {
+          header: true,
+          skipEmptyLines: true,
+          complete: function(results) {
+            allListings = results.data
+              .map(row => ({
+                SKU: (row.SKU || '').trim(),
+                Description: (row.Description || '').trim(),
+                Category: (row.Category || '').trim(),
+                Square_Price: parseFloat(row.Square_Price) || 0,
+                Qty: parseInt(row.Qty) || 0,
+                Status: (row.Status || 'Coming Soon').trim()
+              }))
+              .filter(item => 
+                item.SKU && 
+                item.Square_Price > 0 &&
+                (item.Status === 'Available Now' || item.Status === 'Coming Soon')
+              );
+
+            if (allListings.length === 0) {
+              grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500">No items available right now. Check back soon!</div>`;
             } else {
-              current += char;
+              renderListings(allListings);
+              populateCategoryFilter(allListings);
             }
           }
-          result.push(current.trim());
-          return result;
         });
-
-        if (rows.length < 2) throw new Error('No data rows found');
-
-        const headers = rows[0];
-        const dataRows = rows.slice(1);
-
-        const colMap = {};
-        headers.forEach((h, i) => colMap[h.trim()] = i);
-
-        allListings = dataRows.map(row => ({
-          SKU: (row[colMap['SKU']] || '').replace(/"/g, '').trim(),
-          Description: (row[colMap['Description']] || '').replace(/"/g, '').trim(),
-          Category: (row[colMap['Category']] || '').replace(/"/g, '').trim(),
-          Square_Price: parseFloat((row[colMap['Square_Price']] || '0').replace(/"/g, '').replace(/[^0-9.]/g, '')) || 0,
-          Qty: parseInt((row[colMap['Qty']] || '0').replace(/"/g, '')) || 0,
-          Status: (row[colMap['Status']] || 'Coming Soon').replace(/"/g, '').trim()
-        })).filter(item => 
-          item.SKU && 
-          item.Square_Price > 0 &&
-          (item.Status === 'Available Now' || item.Status === 'Coming Soon')
-        );
-
-        if (allListings.length === 0) {
-          grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500">No items available right now. Check back soon!</div>`;
-        } else {
-          renderListings(allListings);
-          populateCategoryFilter(allListings);
-        }
       } catch (err) {
         console.error(err);
         error.classList.remove('hidden');
