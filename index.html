@@ -39,6 +39,29 @@
     <p class="text-xl text-gray-600 max-w-md mx-auto">Shop with a mission. Every purchase helps fund the work of <span class="font-semibold">Heart Response Ministry</span>.</p>
   </div>
 
+  <!-- Facebook Buttons -->
+  <div class="max-w-5xl mx-auto px-6 pb-8">
+    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+      <button onclick="window.open('https://www.facebook.com/groups/heartlandoutletpalletdeals', '_blank')"
+              class="flex-1 sm:flex-none px-6 py-3 rounded-2xl bg-[#1877F2] hover:bg-[#166FE0] text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors">
+        <i class="fa-brands fa-facebook-f"></i>
+        <span>Join VIP Facebook Group</span>
+      </button>
+
+      <button onclick="window.open('https://www.facebook.com/Theheartlandoutlet', '_blank')"
+              class="flex-1 sm:flex-none px-6 py-3 rounded-2xl bg-[#1877F2] hover:bg-[#166FE0] text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors">
+        <i class="fa-brands fa-facebook-f"></i>
+        <span>Heartland Outlet Page</span>
+      </button>
+
+      <button onclick="window.open('https://www.facebook.com/marketplace/profile/61584748533995/', '_blank')"
+              class="flex-1 sm:flex-none px-6 py-3 rounded-2xl bg-[#1877F2] hover:bg-[#166FE0] text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors">
+        <i class="fa-brands fa-facebook-f"></i>
+        <span>Follow on Marketplace</span>
+      </button>
+    </div>
+  </div>
+
   <!-- Search + Filter -->
   <div class="max-w-7xl mx-auto px-6 pb-6">
     <div class="flex flex-col md:flex-row gap-4">
@@ -57,7 +80,7 @@
   <!-- Listings Sections -->
   <div class="max-w-7xl mx-auto px-6 pb-16 space-y-12">
 
-    <!-- Available Now Section -->
+    <!-- Available Now -->
     <div>
       <div class="flex items-center gap-3 mb-4">
         <h2 class="text-2xl font-bold text-gray-900">Available Now</h2>
@@ -66,7 +89,7 @@
       <div id="availableGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
     </div>
 
-    <!-- Coming Soon Section -->
+    <!-- Coming Soon -->
     <div>
       <div class="flex items-center gap-3 mb-4">
         <h2 class="text-2xl font-bold text-gray-900">Coming Soon (Waitlist)</h2>
@@ -192,15 +215,15 @@
       availableGrid.innerHTML = '';
       comingSoonGrid.innerHTML = '';
 
-      // More flexible status matching
+      // Very flexible status matching
       const available = listings.filter(item => {
-        const status = item.Status.toLowerCase();
-        return status === 'available now' || status === 'available';
+        const s = item.Status.toLowerCase();
+        return s.includes('available') || s === '' || s === 'in stock';
       });
 
       const comingSoon = listings.filter(item => {
-        const status = item.Status.toLowerCase();
-        return status === 'coming soon' || status === 'waitlist';
+        const s = item.Status.toLowerCase();
+        return s.includes('coming') || s.includes('soon') || s.includes('waitlist');
       });
 
       document.getElementById('availableCount').textContent = `${available.length} items`;
@@ -222,7 +245,9 @@
     function createCard(item) {
       const sku = String(item.SKU || '').trim();
       const price = parseFloat(item.Square_Price) || 0;
-      const isComingSoon = item.Status.toLowerCase().includes('coming soon') || item.Status.toLowerCase().includes('waitlist');
+      const isComingSoon = item.Status.toLowerCase().includes('coming') || 
+                           item.Status.toLowerCase().includes('soon') || 
+                           item.Status.toLowerCase().includes('waitlist');
 
       const card = document.createElement('div');
       card.className = `bg-white rounded-3xl overflow-hidden border border-gray-200 card-hover flex flex-col`;
@@ -295,7 +320,7 @@
       document.getElementById('modalItemTitle').textContent = title;
 
       const badge = document.getElementById('modalStatusBadge');
-      if (status.toLowerCase().includes('coming soon')) {
+      if (status.toLowerCase().includes('coming soon') || status.toLowerCase().includes('waitlist')) {
         badge.textContent = 'COMING SOON - WAITLIST';
         badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-amber-500 text-white';
         badge.classList.remove('hidden');
