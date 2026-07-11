@@ -96,6 +96,11 @@ class="px-5 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:bor
 <!-- Listings Sections -->
 <div class="max-w-7xl mx-auto px-6 pb-16 space-y-12">
 
+<div class="bg-gray-100 border border-gray-200 rounded-2xl px-5 py-3 text-xs text-gray-600 flex items-start gap-2">
+<i class="fa-solid fa-circle-info text-gray-400 mt-0.5"></i>
+<span>We do our best to remove sold items right away, but availability can occasionally lag behind real-time inventory. Click "I'm Interested" on any item to confirm current stock and condition before you make plans to purchase.</span>
+</div>
+
 <!-- Available Now -->
 <div>
 <div class="flex items-center gap-3 mb-4">
@@ -114,11 +119,13 @@ class="px-5 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:bor
 <h2 class="text-2xl font-bold text-gray-900">Coming Soon (Waitlist)</h2>
 <span id="comingSoonCount" class="text-sm font-medium px-3 py-1 bg-amber-100 text-amber-700 rounded-full"></span>
 </div>
+<p class="text-xs text-gray-500 mb-4 max-w-2xl">These are items we anticipate having available soon. Because every shipment is inspected upon arrival, exact availability, condition, and contents can vary from what's listed here, and nothing is guaranteed until it's physically in stock.</p>
 <div id="comingSoonGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
 <div class="text-center mt-6">
 <button id="comingSoonLoadMore" onclick="loadMore('comingSoon')" class="hidden px-6 py-3 rounded-2xl border border-gray-300 hover:bg-gray-100 font-semibold text-sm">Load more</button>
 </div>
 </div>
+
 
 </div>
 
