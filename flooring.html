@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flooring Deals | VIP Outlet Deals</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="icon" href="logovip.png" type="image/png">
+<style>
+.card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); }
+.chip { white-space: nowrap; flex-shrink: 0; }
+.chip-scroll::-webkit-scrollbar { display: none; }
+.chip-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+</head>
+<body class="bg-gray-50 font-sans">
+
+<!-- Header -->
+<header class="bg-white border-b sticky top-0 z-50">
+<div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+<a href="index.html" class="flex items-center gap-3">
+<img src="logovip.png" alt="VIP Outlet Deals" class="h-10 w-auto">
+<span class="text-2xl font-bold tracking-tighter text-gray-900">VIP Outlet Deals</span>
+</a>
+<div class="flex items-center gap-4">
+<a href="index.html" class="text-sm font-medium text-gray-600 hover:text-gray-900">All Deals</a>
+<a href="#how-it-works" class="text-sm font-medium text-gray-600 hover:text-gray-900">How it works</a>
+</div>
+</div>
+</header>
+
+<!-- Hero -->
+<div class="max-w-5xl mx-auto px-6 pt-12 pb-8 text-center">
+<div class="inline-flex items-center gap-2 bg-amber-100 text-amber-700 text-xs font-bold px-4 py-1.5 rounded-full mb-5">
+<i class="fa-solid fa-layer-group"></i>
+<span>WATERPROOF VINYL &amp; SPC FLOORING</span>
+</div>
+<h1 class="text-5xl md:text-6xl font-bold tracking-tighter text-gray-900 mb-3">Flooring Deals</h1>
+<p class="text-xl text-gray-600 max-w-lg mx-auto">Name-brand waterproof flooring, priced per box, ready for local pickup in Shakopee.</p>
+</div>
+
+<!-- Search -->
+<div class="max-w-7xl mx-auto px-6 pb-4">
+<input type="text" id="searchInput" placeholder="Search by name or finish (oak, walnut, grey...)"
+class="w-full px-5 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:border-[#ffa125]"
+onkeyup="filterListings()">
+</div>
+
+<!-- Listings -->
+<div class="max-w-7xl mx-auto px-6 pb-16">
+<div class="flex items-center gap-3 mb-4">
+<h2 class="text-2xl font-bold text-gray-900">In Stock Now</h2>
+<span id="flooringCount" class="text-sm font-medium px-3 py-1 bg-green-100 text-green-700 rounded-full"></span>
+</div>
+<div id="flooringGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+</div>
+
+<!-- How it Works -->
+<div id="how-it-works" class="bg-white border-t py-12">
+<div class="max-w-4xl mx-auto px-6">
+<h2 class="text-3xl font-bold tracking-tight mb-8 text-center">How Flooring Deals Work</h2>
+<div class="grid md:grid-cols-3 gap-8 text-sm">
+<div>
+<div class="font-semibold mb-2 flex items-center gap-2"><i class="fa-solid fa-search text-[#ffa125]"></i> Browse by Boxes</div>
+<p class="text-gray-600">Every listing is priced per box, with the number of boxes we currently have in stock.</p>
+</div>
+<div>
+<div class="font-semibold mb-2 flex items-center gap-2"><i class="fa-solid fa-comment-dots text-[#ffa125]"></i> Message Us</div>
+<p class="text-gray-600">Click "I'm Interested" and tell us how many boxes you need. We'll confirm stock and send a simple invoice.</p>
+</div>
+<div>
+<div class="font-semibold mb-2 flex items-center gap-2"><i class="fa-solid fa-truck text-[#ffa125]"></i> Pickup in Shakopee</div>
+<p class="text-gray-600">Pay the invoice and pick up during store hours at Heartland Outlet, 1698 Vierling Drive E, Shakopee, MN.</p>
+</div>
+</div>
+<p class="text-center text-xs text-gray-500 mt-8">Store Hours: Tue &amp; Thu 12–7pm • Fri &amp; Sat 9am–12pm</p>
+</div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-gray-900 text-gray-400 text-sm py-8">
+<div class="max-w-7xl mx-auto px-6 text-center">
+<p>VIP Outlet Deals | Shakopee, MN | Powered by VIP Outlet Deals | Shop With A Mission </p>
+<p class="mt-1 text-xs">Serious inquiries only. Sales tax applies. No negotiations over messaging.</p>
+</div>
+</footer>
+
+<!-- I'm Interested Modal -->
+<div id="interestModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-[100]">
+<div class="bg-white rounded-3xl max-w-md w-full mx-4 p-8">
+<h3 class="text-2xl font-bold mb-2">Interested in this flooring?</h3>
+<p id="modalItemTitle" class="text-gray-600 mb-6 text-sm"></p>
+<div class="space-y-4">
+<div>
+<label class="block text-sm font-medium mb-1.5">Your Name</label>
+<input type="text" id="customerName" class="w-full px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:border-[#ffa125]">
+</div>
+<div>
+<label class="block text-sm font-medium mb-1.5">Phone Number</label>
+<input type="tel" id="customerPhone" class="w-full px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:border-[#ffa125]">
+</div>
+<div>
+<label class="block text-sm font-medium mb-1.5">How many boxes?</label>
+<input type="number" id="customerBoxes" min="1" placeholder="e.g. 12" class="w-full px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:border-[#ffa125]">
+</div>
+</div>
+<div class="flex gap-3 mt-6">
+<button onclick="closeModal()" class="flex-1 py-3.5 rounded-2xl border border-gray-300 font-semibold">Cancel</button>
+<button onclick="submitInterest()" class="flex-1 py-3.5 rounded-2xl bg-gray-900 hover:bg-black text-white font-semibold">Send Request</button>
+</div>
+<p class="text-[10px] text-center text-gray-400 mt-4">We'll text or call you shortly to confirm availability and send an invoice.</p>
+</div>
+</div>
+
+<script>
+const DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQPXYpbeoPGUucM-ztzc19S0iUHZmfAiHR-BDq-Czmfc5FU2RRheHth7ChElIYqBcKwobhzSwwe1TGi/pub?gid=740116708&single=true&output=csv';
+const EMAILJS_SERVICE = 'service_hcctwtc';
+const EMAILJS_TEMPLATE = 'template_28nbhy2';
+const EMAILJS_PUBLIC_KEY = 'QLVByNfZS7_OqeChN';
+
+let allFlooring = [];
+let currentItem = null;
+
+async function loadInventory() {
+const grid = document.getElementById('flooringGrid');
+try {
+const res = await fetch(DATA_URL);
+if (!res.ok) throw new Error('Failed to load data');
+const csvText = await res.text();
+Papa.parse(csvText, {
+header: true,
+skipEmptyLines: true,
+complete: function(results) {
+allFlooring = results.data
+.map(row => ({
+SKU: (row.SKU || '').trim(),
+Description: (row.Description || '').trim(),
+Category: (row.Category || '').trim(),
+Square_Price: parseFloat(row.Square_Price) || 0,
+Qty: parseInt(row.Qty) || 0
+}))
+.filter(item => item.SKU && item.Category.toLowerCase() === 'flooring' && item.Square_Price > 0);
+filterListings();
+}
+});
+} catch (err) {
+console.error(err);
+grid.innerHTML = `<div class="col-span-full text-red-500 py-6">Error loading flooring. Please refresh the page.</div>`;
+}
+}
+
+function handleImageError(img) {
+if (img.dataset.tried === 'jpg') {
+img.dataset.tried = 'png';
+img.src = `images/${img.dataset.sku}.png`;
+} else {
+img.style.display = 'none';
+const placeholder = img.nextElementSibling;
+if (placeholder && placeholder.classList.contains('photo-placeholder')) {
+placeholder.classList.remove('hidden');
+}
+}
+}
+
+function qtyBadge(qty) {
+if (qty <= 10) return `<span class="text-xs font-semibold text-red-600">Only ${qty} boxes left</span>`;
+if (qty <= 30) return `<span class="text-xs font-semibold text-amber-600">${qty} boxes left</span>`;
+return `<span class="text-xs text-gray-500">${qty} boxes in stock</span>`;
+}
+
+function createCard(item) {
+const sku = String(item.SKU || '').trim();
+const price = parseFloat(item.Square_Price) || 0;
+const card = document.createElement('div');
+card.className = 'bg-white rounded-3xl overflow-hidden border border-gray-200 card-hover flex flex-col';
+card.innerHTML = `
+<div class="relative bg-gray-100 h-56 flex items-center justify-center overflow-hidden">
+<img src="images/${sku}.jpg" data-sku="${sku}" data-tried="jpg"
+onerror="handleImageError(this)"
+class="max-h-full max-w-full object-contain p-4"
+alt="${item.Description || 'Flooring'}">
+<div class="photo-placeholder hidden absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gray-100">
+<i class="fa-solid fa-camera text-3xl text-gray-300"></i>
+<span class="text-xs font-semibold text-gray-400">Photo coming soon</span>
+</div>
+</div>
+<div class="p-5 flex-1 flex flex-col">
+<div class="flex-1">
+<span class="font-mono text-xs text-gray-400">${sku}</span>
+<h3 class="font-semibold text-lg leading-tight my-2 line-clamp-3">${item.Description || 'Flooring'}</h3>
+</div>
+<div class="mt-auto pt-4 border-t">
+<div class="flex items-baseline justify-between mb-4">
+<div>
+<span class="text-3xl font-bold tracking-tighter">$${price.toFixed(2)}</span>
+<span class="text-xs text-gray-500">/box</span>
+</div>
+${qtyBadge(item.Qty)}
+</div>
+<button onclick="openInterestModal('${sku}', '${(item.Description || '').replace(/'/g, "\\'")}', ${price})"
+class="w-full bg-gray-900 hover:bg-black active:bg-black transition-colors text-white py-3.5 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2">
+<i class="fa-solid fa-comment-dots"></i>
+<span>I'm Interested</span>
+</button>
+</div>
+</div>
+`;
+return card;
+}
+
+function filterListings() {
+const search = document.getElementById('searchInput').value.toLowerCase().trim();
+const grid = document.getElementById('flooringGrid');
+const countEl = document.getElementById('flooringCount');
+grid.innerHTML = '';
+const filtered = allFlooring
+.filter(item => !search || item.Description.toLowerCase().includes(search) || String(item.SKU).toLowerCase().includes(search))
+.sort((a, b) => b.Qty - a.Qty);
+
+countEl.textContent = `${filtered.length} styles`;
+if (filtered.length === 0) {
+grid.innerHTML = `<div class="col-span-full text-gray-500 py-6">No flooring matches your search.</div>`;
+return;
+}
+filtered.forEach(item => grid.appendChild(createCard(item)));
+}
+
+function openInterestModal(sku, title, price) {
+currentItem = { sku, title, price };
+document.getElementById('modalItemTitle').textContent = title;
+document.getElementById('interestModal').classList.remove('hidden');
+document.getElementById('customerName').focus();
+}
+
+function closeModal() {
+document.getElementById('interestModal').classList.add('hidden');
+}
+
+function submitInterest() {
+const name = document.getElementById('customerName').value.trim();
+const phone = document.getElementById('customerPhone').value.trim();
+const boxes = document.getElementById('customerBoxes').value.trim();
+if (!name || !phone) {
+alert("Please enter your name and phone number.");
+return;
+}
+emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+item_title: currentItem.title + (boxes ? ` (${boxes} boxes requested)` : ''),
+sku: currentItem.sku,
+price: currentItem.price.toFixed(2),
+item_status: 'Flooring',
+customer_name: name,
+customer_phone: phone,
+date: new Date().toLocaleString()
+}).then(() => {
+alert("Request sent! We'll contact you shortly.");
+closeModal();
+document.getElementById('customerName').value = '';
+document.getElementById('customerPhone').value = '';
+document.getElementById('customerBoxes').value = '';
+}).catch((error) => {
+console.error('EmailJS error:', error);
+alert("There was a problem sending your request. Please try again or message us directly.");
+});
+}
+
+function init() {
+emailjs.init(EMAILJS_PUBLIC_KEY);
+loadInventory();
+document.addEventListener('keydown', function(e) {
+if (e.key === 'Escape') closeModal();
+});
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
