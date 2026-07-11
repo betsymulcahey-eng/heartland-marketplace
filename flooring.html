@@ -153,16 +153,24 @@ grid.innerHTML = `<div class="col-span-full text-red-500 py-6">Error loading flo
 }
 
 function handleImageError(img) {
-if (img.dataset.tried === 'jpg') {
-img.dataset.tried = 'png';
-img.src = `images/${img.dataset.sku}.png`;
-} else {
-img.style.display = 'none';
-const placeholder = img.nextElementSibling;
-if (placeholder && placeholder.classList.contains('photo-placeholder')) {
-placeholder.classList.remove('hidden');
-}
-}
+  const stage = img.dataset.tried;
+  const sku = img.dataset.sku;
+  if (stage === 'jpg') {
+    img.dataset.tried = 'png';
+    img.src = `images/${sku}.png`;
+  } else if (stage === 'png') {
+    img.dataset.tried = 'jpg1';
+    img.src = `images/${sku}_1.jpg`;
+  } else if (stage === 'jpg1') {
+    img.dataset.tried = 'png1';
+    img.src = `images/${sku}_1.png`;
+  } else {
+    img.style.display = 'none';
+    const placeholder = img.nextElementSibling;
+    if (placeholder && placeholder.classList.contains('photo-placeholder')) {
+      placeholder.classList.remove('hidden');
+    }
+  }
 }
 
 function qtyBadge(qty) {
