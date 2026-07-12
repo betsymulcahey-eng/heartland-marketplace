@@ -8,19 +8,19 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="icon" href="logovip.png" type="image/png">
+<link rel="icon" href="/logovip.png" type="image/png">
 </head>
 <body class="bg-gray-50 font-sans">
 
 <header class="bg-white border-b sticky top-0 z-50">
 <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-<a href="index.html" class="flex items-center gap-3">
-<img src="logovip.png" alt="VIP Outlet Deals" class="h-10 w-auto">
+<a href="/" class="flex items-center gap-3">
+<img src="/logovip.png" alt="VIP Outlet Deals" class="h-10 w-auto">
 <span class="text-2xl font-bold tracking-tighter text-gray-900">VIP Outlet Deals</span>
 </a>
 <div class="flex items-center gap-4">
-<a href="index.html" class="text-sm font-medium text-gray-600 hover:text-gray-900">All Deals</a>
-<a href="updates.html" class="text-sm font-medium text-gray-600 hover:text-gray-900">Updates</a>
+<a href="/" class="text-sm font-medium text-gray-600 hover:text-gray-900">All Deals</a>
+<a href="/updates/" class="text-sm font-medium text-gray-600 hover:text-gray-900">Updates</a>
 </div>
 </div>
 </header>
@@ -107,6 +107,18 @@
 </div>
 
 <div class="mb-6">
+<label class="block text-sm font-semibold text-gray-800 mb-2">Which style are you drawn to?</label>
+<select id="style" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:border-[#ffa125] text-sm bg-white">
+<option value="">Select one</option>
+<option>Modern / minimal</option>
+<option>Farmhouse / rustic</option>
+<option>Traditional / classic</option>
+<option>Warm wood tones</option>
+<option>Not sure yet</option>
+</select>
+</div>
+
+<div class="mb-6">
 <label class="block text-sm font-semibold text-gray-800 mb-2">Tell me about your project</label>
 <textarea id="vision" rows="3" placeholder="What's the vibe? Any colors, styles, or must-haves?" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:border-[#ffa125] text-sm"></textarea>
 </div>
@@ -160,6 +172,7 @@ const timeline = document.getElementById('timeline').value;
 const formatEl = document.querySelector('input[name="format"]:checked');
 const format = formatEl ? formatEl.value : '';
 const vision = document.getElementById('vision').value.trim();
+const style = document.getElementById('style').value;
 const name = document.getElementById('customerName').value.trim();
 const phone = document.getElementById('customerPhone').value.trim();
 
@@ -178,6 +191,7 @@ Measurements: ${measurements || 'Not provided'}
 Budget: ${budget || 'Not specified'}
 Timeline: ${timeline || 'Not specified'}
 Preferred format: ${format || 'Not specified'}
+Style preference: ${style || 'Not specified'}
 Project details: ${vision || 'None provided'}`;
 
 emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {

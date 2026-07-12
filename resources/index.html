@@ -8,19 +8,19 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="icon" href="logovip.png" type="image/png">
+<link rel="icon" href="/logovip.png" type="image/png">
 </head>
 <body class="bg-gray-50 font-sans">
 
 <header class="bg-white border-b sticky top-0 z-50">
 <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-<a href="index.html" class="flex items-center gap-3">
-<img src="logovip.png" alt="VIP Outlet Deals" class="h-10 w-auto">
+<a href="/" class="flex items-center gap-3">
+<img src="/logovip.png" alt="VIP Outlet Deals" class="h-10 w-auto">
 <span class="text-2xl font-bold tracking-tighter text-gray-900">VIP Outlet Deals</span>
 </a>
 <div class="flex items-center gap-4">
-<a href="index.html" class="text-sm font-medium text-gray-600 hover:text-gray-900">All Deals</a>
-<a href="personal-shopping.html" class="text-sm font-medium text-gray-600 hover:text-gray-900">Personal Shopping</a>
+<a href="/" class="text-sm font-medium text-gray-600 hover:text-gray-900">All Deals</a>
+<a href="/personal-shopping/" class="text-sm font-medium text-gray-600 hover:text-gray-900">Personal Shopping</a>
 </div>
 </div>
 </header>
@@ -91,7 +91,7 @@
 
 <div class="mt-8 bg-gray-900 rounded-3xl p-8 text-center">
 <p class="text-white text-lg font-semibold mb-4">Filled one out? Send it my way and I'll help you find exactly what you need.</p>
-<a href="personal-shopping.html" class="inline-flex items-center gap-2 bg-[#ffa125] hover:bg-[#e8910f] text-white font-semibold px-8 py-3.5 rounded-2xl transition-colors">
+<a href="/personal-shopping/" class="inline-flex items-center gap-2 bg-[#ffa125] hover:bg-[#e8910f] text-white font-semibold px-8 py-3.5 rounded-2xl transition-colors">
 <i class="fa-solid fa-list-check"></i>
 <span>Book a Personal Shopping Consult</span>
 </a>
@@ -141,7 +141,7 @@ document.getElementById('libraryView').classList.remove('hidden');
 
 function download(filename, label) {
 const a = document.createElement('a');
-a.href = 'worksheets/' + filename;
+a.href = '/worksheets/' + filename;
 a.download = filename;
 a.click();
 
