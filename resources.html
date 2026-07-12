@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Bathroom Remodel Worksheets | VIP Outlet Deals, Shakopee MN</title>
+<meta name="description" content="Free downloadable measurement worksheets for bathroom flooring, vanity, toilet, and tub/shower remodels. Get your measurements right before you shop.">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="icon" href="logovip.png" type="image/png">
+</head>
+<body class="bg-gray-50 font-sans">
+
+<header class="bg-white border-b sticky top-0 z-50">
+<div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+<a href="index.html" class="flex items-center gap-3">
+<img src="logovip.png" alt="VIP Outlet Deals" class="h-10 w-auto">
+<span class="text-2xl font-bold tracking-tighter text-gray-900">VIP Outlet Deals</span>
+</a>
+<div class="flex items-center gap-4">
+<a href="index.html" class="text-sm font-medium text-gray-600 hover:text-gray-900">All Deals</a>
+<a href="personal-shopping.html" class="text-sm font-medium text-gray-600 hover:text-gray-900">Personal Shopping</a>
+</div>
+</div>
+</header>
+
+<div class="max-w-3xl mx-auto px-6 pt-12 pb-8 text-center">
+<div class="inline-flex items-center gap-2 bg-amber-100 text-amber-700 text-xs font-bold px-4 py-1.5 rounded-full mb-5">
+<i class="fa-solid fa-ruler-combined"></i>
+<span>FREE WORKSHEETS</span>
+</div>
+<h1 class="text-4xl md:text-5xl font-bold tracking-tighter text-gray-900 mb-3">Get Your Measurements Right Before You Shop</h1>
+<p class="text-lg text-gray-600 max-w-xl mx-auto">Four free printable worksheets covering everything you need to measure for a bathroom remodel. Grab just the one you need, or all four.</p>
+</div>
+
+<div class="max-w-3xl mx-auto px-6 pb-20">
+
+<div id="gateView" class="bg-white rounded-3xl border border-gray-200 p-8 text-center">
+<i class="fa-solid fa-lock text-3xl text-gray-300 mb-4"></i>
+<h2 class="text-xl font-bold text-gray-900 mb-2">Enter your info to unlock the worksheets</h2>
+<p class="text-gray-500 text-sm mb-6 max-w-sm mx-auto">One quick step, then all four are yours to download and print.</p>
+<div class="max-w-sm mx-auto space-y-3">
+<input type="text" id="leadName" placeholder="Your name" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:border-[#ffa125] text-sm">
+<input type="email" id="leadEmail" placeholder="Email address" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:border-[#ffa125] text-sm">
+<input type="tel" id="leadPhone" placeholder="Phone (optional)" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:border-[#ffa125] text-sm">
+<button onclick="unlockLibrary()" class="w-full bg-gray-900 hover:bg-black text-white font-semibold py-3.5 rounded-2xl">Unlock Worksheets</button>
+</div>
+</div>
+
+<div id="libraryView" class="hidden">
+<div class="grid sm:grid-cols-2 gap-5">
+
+<div class="bg-white rounded-3xl border border-gray-200 p-6">
+<i class="fa-solid fa-layer-group text-2xl text-amber-600 mb-3"></i>
+<h3 class="font-bold text-lg text-gray-900 mb-1">Bathroom Flooring</h3>
+<p class="text-sm text-gray-500 mb-4">Room dimensions, square footage, and transitions.</p>
+<button onclick="download('worksheet-bathroom-flooring.pdf','Bathroom Flooring')" class="w-full bg-gray-900 hover:bg-black text-white font-semibold py-3 rounded-xl text-sm flex items-center justify-center gap-2">
+<i class="fa-solid fa-download"></i><span>Download</span>
+</button>
+</div>
+
+<div class="bg-white rounded-3xl border border-gray-200 p-6">
+<i class="fa-solid fa-faucet text-2xl text-amber-600 mb-3"></i>
+<h3 class="font-bold text-lg text-gray-900 mb-1">Vanity</h3>
+<p class="text-sm text-gray-500 mb-4">Wall width, clearances, and plumbing rough-in.</p>
+<button onclick="download('worksheet-vanity.pdf','Vanity')" class="w-full bg-gray-900 hover:bg-black text-white font-semibold py-3 rounded-xl text-sm flex items-center justify-center gap-2">
+<i class="fa-solid fa-download"></i><span>Download</span>
+</button>
+</div>
+
+<div class="bg-white rounded-3xl border border-gray-200 p-6">
+<i class="fa-solid fa-toilet text-2xl text-amber-600 mb-3"></i>
+<h3 class="font-bold text-lg text-gray-900 mb-1">Toilet</h3>
+<p class="text-sm text-gray-500 mb-4">Rough-in measurement and clearance space.</p>
+<button onclick="download('worksheet-toilet.pdf','Toilet')" class="w-full bg-gray-900 hover:bg-black text-white font-semibold py-3 rounded-xl text-sm flex items-center justify-center gap-2">
+<i class="fa-solid fa-download"></i><span>Download</span>
+</button>
+</div>
+
+<div class="bg-white rounded-3xl border border-gray-200 p-6">
+<i class="fa-solid fa-bath text-2xl text-amber-600 mb-3"></i>
+<h3 class="font-bold text-lg text-gray-900 mb-1">Tub &amp; Shower</h3>
+<p class="text-sm text-gray-500 mb-4">Alcove sizing, drain location, and valve height.</p>
+<button onclick="download('worksheet-tub-shower.pdf','Tub and Shower')" class="w-full bg-gray-900 hover:bg-black text-white font-semibold py-3 rounded-xl text-sm flex items-center justify-center gap-2">
+<i class="fa-solid fa-download"></i><span>Download</span>
+</button>
+</div>
+
+</div>
+
+<div class="mt-8 bg-gray-900 rounded-3xl p-8 text-center">
+<p class="text-white text-lg font-semibold mb-4">Filled one out? Send it my way and I'll help you find exactly what you need.</p>
+<a href="personal-shopping.html" class="inline-flex items-center gap-2 bg-[#ffa125] hover:bg-[#e8910f] text-white font-semibold px-8 py-3.5 rounded-2xl transition-colors">
+<i class="fa-solid fa-list-check"></i>
+<span>Book a Personal Shopping Consult</span>
+</a>
+</div>
+</div>
+
+</div>
+
+<footer class="bg-gray-900 text-gray-400 text-sm py-8">
+<div class="max-w-7xl mx-auto px-6 text-center">
+<p>VIP Outlet Deals | Shakopee, MN | Powered by VIP Outlet Deals | Shop With A Mission </p>
+<p class="mt-1 text-xs">Serious inquiries only. Sales tax applies. No negotiations over messaging.</p>
+</div>
+</footer>
+
+<script>
+const EMAILJS_SERVICE = 'service_hcctwtc';
+const EMAILJS_TEMPLATE = 'template_28nbhy2';
+const EMAILJS_PUBLIC_KEY = 'QLVByNfZS7_OqeChN';
+emailjs.init(EMAILJS_PUBLIC_KEY);
+
+let lead = null;
+
+function unlockLibrary() {
+const name = document.getElementById('leadName').value.trim();
+const email = document.getElementById('leadEmail').value.trim();
+const phone = document.getElementById('leadPhone').value.trim();
+if (!name || !email) {
+alert('Please enter your name and email.');
+return;
+}
+lead = { name, email, phone };
+
+emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+item_title: `WORKSHEET LIBRARY LEAD\nEmail: ${email}`,
+sku: '—',
+price: '—',
+item_status: 'Worksheet Library Signup',
+customer_name: name,
+customer_phone: phone || 'Not provided',
+date: new Date().toLocaleString()
+}).catch(err => console.error('EmailJS error:', err));
+
+document.getElementById('gateView').classList.add('hidden');
+document.getElementById('libraryView').classList.remove('hidden');
+}
+
+function download(filename, label) {
+const a = document.createElement('a');
+a.href = 'worksheets/' + filename;
+a.download = filename;
+a.click();
+
+if (lead) {
+emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+item_title: `WORKSHEET DOWNLOADED: ${label}`,
+sku: '—',
+price: '—',
+item_status: 'Worksheet Download',
+customer_name: lead.name,
+customer_phone: lead.phone || lead.email,
+date: new Date().toLocaleString()
+}).catch(err => console.error('EmailJS error:', err));
+}
+}
+</script>
+</body>
+</html>
