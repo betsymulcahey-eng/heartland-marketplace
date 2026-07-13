@@ -25,7 +25,18 @@
 <img src="/logovip.png" alt="VIP Outlet Deals" class="h-10 w-auto">
 <span class="text-lg sm:text-2xl font-bold tracking-tighter text-gray-900">VIP Outlet Deals</span>
 </a>
-<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center gap-4">
+<a href="/" class="text-sm font-medium text-gray-600 hover:text-gray-900">All Deals</a>
+<a href="/updates/" class="text-sm font-medium text-gray-600 hover:text-gray-900">Updates</a>
+<a href="/how-it-works/" class="text-sm font-medium text-gray-600 hover:text-gray-900">How it works</a>
+<a href="/about/" class="text-sm font-medium text-gray-600 hover:text-gray-900">About</a>
+</div>
+<button onclick="document.getElementById('mobileMenu').classList.toggle('hidden')" class="md:hidden text-gray-700 text-2xl px-2 py-1" aria-label="Menu">
+<i class="fa-solid fa-bars"></i>
+</button>
+</div>
+<div id="mobileMenu" class="hidden md:hidden border-t bg-white">
+<div class="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-4">
 <a href="/" class="text-sm font-medium text-gray-600 hover:text-gray-900">All Deals</a>
 <a href="/updates/" class="text-sm font-medium text-gray-600 hover:text-gray-900">Updates</a>
 <a href="/how-it-works/" class="text-sm font-medium text-gray-600 hover:text-gray-900">How it works</a>
@@ -42,6 +53,44 @@
 </div>
 <h1 class="text-5xl md:text-6xl font-bold tracking-tighter text-gray-900 mb-3">Flooring Deals</h1>
 <p class="text-xl text-gray-600 max-w-lg mx-auto">Name-brand waterproof flooring, priced per box, ready for local pickup in Shakopee.</p>
+</div>
+
+<!-- Flooring Calculator -->
+<div class="max-w-3xl mx-auto px-6 pb-8">
+<div class="bg-white rounded-3xl border border-gray-200 overflow-hidden">
+<button onclick="document.getElementById('calcBody').classList.toggle('hidden'); document.getElementById('calcChevron').classList.toggle('rotate-180')"
+class="w-full flex items-center justify-between px-6 py-4 text-left">
+<span class="font-bold text-gray-900 flex items-center gap-2"><i class="fa-solid fa-calculator text-[#ffa125]"></i> How Much Flooring Do I Need? <span class="text-xs font-normal text-gray-400">(tap to calculate)</span></span>
+<i id="calcChevron" class="fa-solid fa-chevron-down text-gray-400 transition-transform"></i>
+</button>
+<div id="calcBody" class="hidden px-6 pb-6">
+<div id="roomRows" class="space-y-3 mb-3"></div>
+<button onclick="addRoom()" class="text-sm font-semibold text-amber-700 hover:text-amber-800 mb-5"><i class="fa-solid fa-plus mr-1"></i>Add another room</button>
+
+<div class="grid sm:grid-cols-2 gap-4 mb-5 pt-4 border-t">
+<div>
+<label class="block text-xs font-semibold text-gray-500 mb-1">Waste / cut allowance</label>
+<select id="wasteFactor" onchange="calcTotals()" class="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-sm bg-white">
+<option value="0.10" selected>10% (standard)</option>
+<option value="0.15">15% (diagonal/complex layout)</option>
+<option value="0.05">5% (simple, few cuts)</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-semibold text-gray-500 mb-1">Sq ft per box (optional)</label>
+<input type="number" id="sqftPerBox" oninput="calcTotals()" placeholder="e.g. 27.44" class="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-sm">
+</div>
+</div>
+
+<div class="bg-amber-50 rounded-2xl p-5 space-y-2">
+<div class="flex justify-between text-sm text-gray-600"><span>Total room area</span><span id="rawTotal">0 sq ft</span></div>
+<div class="flex justify-between text-sm text-gray-600"><span>Plus waste allowance</span><span id="wasteAmt">0 sq ft</span></div>
+<div class="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-amber-200"><span>You'll need</span><span id="finalTotal">0 sq ft</span></div>
+<div id="boxRow" class="hidden flex justify-between text-sm font-semibold text-amber-700 pt-1"><span>Boxes needed</span><span id="boxTotal">0 boxes</span></div>
+</div>
+<p class="text-xs text-gray-400 mt-4">Not sure about your exact measurements? <a href="/resources/" class="underline font-semibold">Download a free measurement worksheet</a> or <a href="/personal-shopping/" class="underline font-semibold">book a consult</a> and I'll help.</p>
+</div>
+</div>
 </div>
 
 <!-- Search -->
@@ -388,9 +437,55 @@ alert("There was a problem sending your request. Please try again or message us 
 });
 }
 
+let roomCount = 0;
+
+function addRoom() {
+roomCount++;
+const wrap = document.getElementById('roomRows');
+const row = document.createElement('div');
+row.className = 'flex items-center gap-2';
+row.id = 'room-' + roomCount;
+row.innerHTML = `
+<input type="text" placeholder="Room name" class="flex-1 px-3 py-2.5 rounded-xl border border-gray-300 text-sm room-name" value="Room ${roomCount}">
+<input type="number" placeholder="Length (ft)" oninput="calcTotals()" class="w-28 px-3 py-2.5 rounded-xl border border-gray-300 text-sm room-length">
+<span class="text-gray-400 text-sm">x</span>
+<input type="number" placeholder="Width (ft)" oninput="calcTotals()" class="w-28 px-3 py-2.5 rounded-xl border border-gray-300 text-sm room-width">
+<button onclick="document.getElementById('room-${roomCount}').remove(); calcTotals()" class="text-gray-300 hover:text-red-500 px-2"><i class="fa-solid fa-xmark"></i></button>
+`;
+wrap.appendChild(row);
+row.querySelector('.room-length').addEventListener('input', calcTotals);
+row.querySelector('.room-width').addEventListener('input', calcTotals);
+}
+
+function calcTotals() {
+const rows = document.querySelectorAll('#roomRows > div');
+let total = 0;
+rows.forEach(r => {
+const l = parseFloat(r.querySelector('.room-length').value) || 0;
+const w = parseFloat(r.querySelector('.room-width').value) || 0;
+total += l * w;
+});
+const waste = parseFloat(document.getElementById('wasteFactor').value) || 0;
+const finalTotal = total * (1 + waste);
+document.getElementById('rawTotal').textContent = total.toFixed(1) + ' sq ft';
+document.getElementById('wasteAmt').textContent = '+' + (finalTotal - total).toFixed(1) + ' sq ft';
+document.getElementById('finalTotal').textContent = finalTotal.toFixed(1) + ' sq ft';
+
+const sqftPerBox = parseFloat(document.getElementById('sqftPerBox').value) || 0;
+const boxRow = document.getElementById('boxRow');
+if (sqftPerBox > 0) {
+boxRow.classList.remove('hidden');
+boxRow.classList.add('flex');
+document.getElementById('boxTotal').textContent = Math.ceil(finalTotal / sqftPerBox) + ' boxes';
+} else {
+boxRow.classList.add('hidden');
+}
+}
+
 function init() {
 emailjs.init(EMAILJS_PUBLIC_KEY);
 loadInventory();
+addRoom();
 document.addEventListener('keydown', function(e) {
 const galleryModal = document.getElementById('galleryModal');
 const galleryOpen = galleryModal && !galleryModal.classList.contains('hidden');
