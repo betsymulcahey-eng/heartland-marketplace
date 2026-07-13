@@ -25,7 +25,22 @@
 <img src="/logovip.png" alt="VIP Outlet Deals" class="h-10 w-auto">
 <span class="text-lg sm:text-2xl font-bold tracking-tighter text-gray-900">VIP Outlet Deals</span>
 </div>
-<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center gap-4">
+<button onclick="window.open('https://preview.mailerlite.io/forms/2465440/191276452992255999/share', '_blank')"
+class="px-5 py-2.5 rounded-2xl bg-white border border-gray-300 hover:bg-gray-100 font-semibold text-sm flex items-center gap-2">
+<i class="fa-solid fa-envelope"></i>
+<span>Subscribe for Deals</span>
+</button>
+<a href="/flooring/" class="text-sm font-medium text-gray-600 hover:text-gray-900">Flooring Deals</a>
+<a href="/how-it-works/" class="text-sm font-medium text-gray-600 hover:text-gray-900">How it works</a>
+<a href="/about/" class="text-sm font-medium text-gray-600 hover:text-gray-900">About</a>
+</div>
+<button onclick="document.getElementById('mobileMenu').classList.toggle('hidden')" class="md:hidden text-gray-700 text-2xl px-2 py-1" aria-label="Menu">
+<i class="fa-solid fa-bars"></i>
+</button>
+</div>
+<div id="mobileMenu" class="hidden md:hidden border-t bg-white">
+<div class="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-4">
 <button onclick="window.open('https://preview.mailerlite.io/forms/2465440/191276452992255999/share', '_blank')"
 class="px-5 py-2.5 rounded-2xl bg-white border border-gray-300 hover:bg-gray-100 font-semibold text-sm flex items-center gap-2">
 <i class="fa-solid fa-envelope"></i>
@@ -39,14 +54,14 @@ class="px-5 py-2.5 rounded-2xl bg-white border border-gray-300 hover:bg-gray-100
 </header>
 
 <!-- Hero -->
-<div class="max-w-5xl mx-auto px-6 pt-12 pb-8 text-center">
-<img src="/logovip.png" alt="VIP Outlet Deals" class="mx-auto h-28 mb-6">
-<h1 class="text-5xl md:text-6xl font-bold tracking-tighter text-gray-900 mb-3">Quality Finds.<br>Local Pickup.</h1>
-<p class="text-xl text-gray-600 max-w-md mx-auto">Shop with a mission. Every purchase helps fund the work of <span class="font-semibold">Heart Response Ministry</span>.</p>
+<div class="max-w-5xl mx-auto px-6 pt-8 pb-4 text-center">
+<img src="/logovip.png" alt="VIP Outlet Deals" class="mx-auto h-16 mb-4">
+<h1 class="text-3xl md:text-5xl font-bold tracking-tighter text-gray-900 mb-2">Quality Finds.<br>Local Pickup in Shakopee, MN.</h1>
+<p class="text-base md:text-lg text-gray-600 max-w-md mx-auto">Shop with a mission. Every purchase helps fund the work of <span class="font-semibold">Heart Response Ministry</span>.</p>
 </div>
 
 <!-- Facebook Buttons -->
-<div class="max-w-5xl mx-auto px-6 pb-8">
+<div class="max-w-5xl mx-auto px-6 pb-4">
 <div class="flex flex-col sm:flex-row gap-3 justify-center">
 <button onclick="window.open('https://www.facebook.com/groups/heartlandoutletpalletdeals', '_blank')"
 class="flex-1 sm:flex-none px-6 py-3 rounded-2xl bg-[#1877F2] hover:bg-[#166FE0] text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors">
@@ -67,7 +82,7 @@ class="flex-1 sm:flex-none px-6 py-3 rounded-2xl bg-[#1877F2] hover:bg-[#166FE0]
 </div>
 
 <!-- Category Buttons -->
-<div class="max-w-5xl mx-auto px-6 pb-8">
+<div class="max-w-5xl mx-auto px-6 pb-4">
 <p class="text-center text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Shop by category</p>
 <div class="flex flex-col sm:flex-row gap-3 justify-center">
 <a href="/flooring/"
