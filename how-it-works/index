@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How VIP Outlet Deals Works | Shakopee, MN</title>
+<meta name="description" content="How to shop VIP Outlet Deals: Facebook Marketplace, the VIP Facebook Group, the website, the Thursday auction, and personal shopping consultations.">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="icon" href="/logovip.png" type="image/png">
+</head>
+<body class="bg-gray-50 font-sans">
+
+<header class="bg-white border-b sticky top-0 z-50">
+<div class="max-w-7xl mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-y-2">
+<a href="/" class="flex items-center gap-3">
+<img src="/logovip.png" alt="VIP Outlet Deals" class="h-10 w-auto">
+<span class="text-lg sm:text-2xl font-bold tracking-tighter text-gray-900">VIP Outlet Deals</span>
+</a>
+<div class="flex items-center gap-4">
+<a href="/" class="text-sm font-medium text-gray-600 hover:text-gray-900">All Deals</a>
+<a href="/updates/" class="text-sm font-medium text-gray-600 hover:text-gray-900">Updates</a>
+<a href="/about/" class="text-sm font-medium text-gray-600 hover:text-gray-900">About</a>
+</div>
+</div>
+</header>
+
+<div class="max-w-3xl mx-auto px-6 pt-12 pb-8 text-center">
+<div class="inline-flex items-center gap-2 bg-amber-100 text-amber-700 text-xs font-bold px-4 py-1.5 rounded-full mb-5">
+<i class="fa-solid fa-circle-question"></i>
+<span>HOW IT WORKS</span>
+</div>
+<h1 class="text-4xl md:text-5xl font-bold tracking-tighter text-gray-900 mb-3">How VIP Outlet Deals Works</h1>
+<p class="text-lg text-gray-600 max-w-xl mx-auto">Everything in one place — where deals show up, how to buy, and what to expect.</p>
+</div>
+
+<article class="max-w-3xl mx-auto px-6 pb-16">
+
+<div class="bg-white rounded-3xl border border-gray-200 p-7 mb-8">
+<h2 class="text-2xl font-bold text-gray-900 mb-4">Where deals show up</h2>
+<div class="space-y-4 text-gray-700">
+<p><strong>This website</strong> — the full current selection, organized by category, with search and sorting. <a href="/flooring/" class="text-amber-700 font-semibold underline">Flooring</a> has its own page grouped by brand.</p>
+<p><strong>The VIP Facebook Group</strong> — where our Thursday auction happens live, and where you'll see new arrivals first.</p>
+<p><strong>Facebook Marketplace</strong> — a lot of the same inventory is also listed here for anyone who prefers browsing that way.</p>
+<p><strong>The Updates blog</strong> — <a href="/updates/" class="text-amber-700 font-semibold underline">product spotlights and what's new</a> at Heartland Outlet.</p>
+</div>
+</div>
+
+<div class="bg-white rounded-3xl border border-gray-200 p-7 mb-8">
+<h2 class="text-2xl font-bold text-gray-900 mb-4">How to buy something</h2>
+<div class="grid sm:grid-cols-3 gap-6 text-sm">
+<div>
+<div class="font-semibold mb-2 flex items-center gap-2"><i class="fa-solid fa-search text-[#ffa125]"></i> 1. Browse</div>
+<p class="text-gray-600">Find something you want on the site, in the Facebook group, or on Marketplace.</p>
+</div>
+<div>
+<div class="font-semibold mb-2 flex items-center gap-2"><i class="fa-solid fa-comment-dots text-[#ffa125]"></i> 2. Message</div>
+<p class="text-gray-600">Click "I'm Interested" or send a message. We'll confirm stock and condition, then send a simple invoice.</p>
+</div>
+<div>
+<div class="font-semibold mb-2 flex items-center gap-2"><i class="fa-solid fa-truck text-[#ffa125]"></i> 3. Pick up</div>
+<p class="text-gray-600">Pay the invoice and pick up during store hours at Heartland Outlet, 1698 Vierling Drive E, Shakopee, MN.</p>
+</div>
+</div>
+<p class="text-center text-xs text-gray-500 mt-6">Store Hours: Tue &amp; Thu 12–7pm • Fri &amp; Sat 9am–12pm</p>
+</div>
+
+<div class="bg-white rounded-3xl border border-gray-200 p-7 mb-8">
+<h2 class="text-2xl font-bold text-gray-900 mb-4">The Thursday auction</h2>
+<p class="text-gray-700">Every Thursday, new items go live in the VIP Facebook Group as part of our auction. It's the fastest way to see what's new and get first pick before things move to the website or Marketplace.</p>
+</div>
+
+<div class="bg-white rounded-3xl border border-gray-200 p-7 mb-8">
+<h2 class="text-2xl font-bold text-gray-900 mb-4">Planning a remodel?</h2>
+<p class="text-gray-700 mb-4">If you're working on a bathroom or kitchen project, you don't have to piece it together yourself. Book a free personal shopping consultation and tell me what you're looking for — I'll help you find it.</p>
+<a href="/personal-shopping/" class="inline-flex items-center gap-2 bg-[#ffa125] hover:bg-[#e8910f] text-white font-semibold px-6 py-3 rounded-2xl transition-colors text-sm">
+<i class="fa-solid fa-list-check"></i>
+<span>Book a Personal Shopping Consult</span>
+</a>
+<span class="mx-2 text-gray-300">or</span>
+<a href="/resources/" class="inline-flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 font-semibold px-6 py-3 rounded-2xl transition-colors text-sm">
+<i class="fa-solid fa-ruler-combined"></i>
+<span>Download Free Worksheets</span>
+</a>
+</div>
+
+<div class="bg-gray-100 border border-gray-200 rounded-2xl px-6 py-5 mb-8">
+<h3 class="font-bold text-gray-900 mb-2 flex items-center gap-2"><i class="fa-solid fa-circle-info text-gray-400"></i> A couple of important notes</h3>
+<div class="space-y-3 text-sm text-gray-600">
+<p>We do our best to remove sold items right away, but availability can occasionally lag behind real-time inventory. Click "I'm Interested" on any item to confirm current stock and condition before you make plans to purchase.</p>
+<p>"Coming Soon" items reflect what we anticipate having available. Because every shipment is inspected upon arrival, exact availability, condition, and contents can vary from what's listed, and nothing is guaranteed until it's physically in stock.</p>
+<p>Prices are firm since everything is already deeply discounted — no negotiating over messaging.</p>
+</div>
+</div>
+
+<div class="text-center">
+<p class="text-gray-600 mb-1">Every purchase helps support</p>
+<p class="font-semibold text-gray-900">Heart Response Ministry</p>
+</div>
+
+</article>
+
+<footer class="bg-gray-900 text-gray-400 text-sm py-8">
+<div class="max-w-7xl mx-auto px-6 text-center">
+<p>VIP Outlet Deals | Shakopee, MN | Powered by VIP Outlet Deals | Shop With A Mission </p>
+<p class="mt-1 text-xs">Serious inquiries only. Sales tax applies. No negotiations over messaging.</p>
+</div>
+</footer>
+
+</body>
+</html>
