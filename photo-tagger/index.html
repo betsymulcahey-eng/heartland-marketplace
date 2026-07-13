@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photo Tagger — VIP Outlet Deals</title>
+<meta name="robots" content="noindex, nofollow">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  :root{
+    --bg:#E9EDEC;
+    --paper:#FFFFFF;
+    --ink:#1F2421;
+    --muted:#6B7068;
+    --line:#D4D8D2;
+    --accent:#B23A1E;
+    --accent-ink:#FFF3EE;
+    --done:#1F6F5C;
+    --done-bg:#E4F1EC;
+    --tag-bg:#22252A;
+    --tag-ink:#F2E9C9;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    min-height:100vh;
+  }
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+  header{
+    background:var(--tag-bg);
+    color:var(--tag-ink);
+    padding:20px 28px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  header h1{
+    margin:0;
+    font-size:19px;
+    font-weight:700;
+    letter-spacing:0.02em;
+  }
+  header .sub{
+    font-size:12px;
+    color:#B9BEB2;
+    margin-top:2px;
+  }
+  .stamp{
+    border:2px dashed var(--accent);
+    color:var(--accent);
+    background:transparent;
+    font-weight:700;
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    padding:6px 12px;
+    border-radius:3px;
+  }
+  .progress-wrap{
+    background:var(--bg);
+    border-bottom:1px solid var(--line);
+    padding:12px 28px;
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+  .bar-track{
+    flex:1;
+    height:8px;
+    background:var(--line);
+    border-radius:5px;
+    overflow:hidden;
+  }
+  .bar-fill{
+    height:100%;
+    background:var(--done);
+    width:0%;
+    transition:width 0.25s ease;
+  }
+  .progress-text{
+    font-size:13px;
+    font-weight:700;
+    white-space:nowrap;
+  }
+  .actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  button{
+    font-family:inherit;
+    font-size:13px;
+    font-weight:700;
+    border-radius:5px;
+    padding:9px 14px;
+    cursor:pointer;
+    border:1px solid var(--line);
+    background:var(--paper);
+    color:var(--ink);
+  }
+  button:hover{border-color:var(--ink);}
+  button.primary{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:var(--accent-ink);
+  }
+  button.primary:hover{background:#96311a;}
+  button:disabled{opacity:0.4;cursor:not-allowed;}
+  .layout{
+    display:grid;
+    grid-template-columns:300px 1fr;
+    min-height:calc(100vh - 128px);
+  }
+  @media (max-width:760px){
+    .layout{grid-template-columns:1fr;}
+  }
+  .sidebar{
+    background:var(--paper);
+    border-right:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+  }
+  .search-box{
+    padding:14px;
+    border-bottom:1px solid var(--line);
+  }
+  .search-box input{
+    width:100%;
+    padding:9px 10px;
+    border:1px solid var(--line);
+    border-radius:5px;
+    font-size:13px;
+    font-family:inherit;
+  }
+  .item-list{
+    overflow-y:auto;
+    flex:1;
+  }
+  .item-row{
+    padding:10px 14px;
+    border-bottom:1px solid #F0F1EC;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .item-row:hover{background:#F5F6F2;}
+  .item-row.active{background:var(--done-bg);}
+  .dot{
+    width:9px;height:9px;border-radius:50%;
+    border:1.5px solid var(--line);
+    flex-shrink:0;
+  }
+  .dot.done{background:var(--done);border-color:var(--done);}
+  .item-row .info{min-width:0;flex:1;}
+  .item-row .name{
+    font-size:12.5px;
+    line-height:1.35;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+  }
+  .item-row .sku{
+    font-size:11px;
+    color:var(--muted);
+    margin-top:2px;
+  }
+  .count-badge{
+    font-size:11px;
+    font-weight:700;
+    background:var(--done);
+    color:#fff;
+    border-radius:10px;
+    padding:1px 7px;
+    flex-shrink:0;
+  }
+  .main{
+    padding:28px;
+    overflow-y:auto;
+  }
+  .setup-card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:20px;
+    margin-bottom:22px;
+  }
+  .setup-card h3{margin:0 0 6px;font-size:14px;}
+  .setup-card p{margin:0 0 12px;font-size:12.5px;color:var(--muted);}
+  textarea{
+    width:100%;
+    min-height:80px;
+    font-family:ui-monospace,monospace;
+    font-size:11.5px;
+    padding:10px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    resize:vertical;
+  }
+  .row-flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;}
+  .empty-main{
+    text-align:center;
+    color:var(--muted);
+    padding:80px 20px;
+    font-size:14px;
+  }
+  .tag-header{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+  }
+  .tag-header h2{
+    font-size:17px;
+    margin:0 0 8px;
+    max-width:520px;
+  }
+  .sku-pill{
+    display:inline-block;
+    background:var(--tag-bg);
+    color:var(--tag-ink);
+    font-family:ui-monospace,monospace;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:0.03em;
+    padding:5px 10px;
+    border-radius:4px;
+  }
+  .dropzone{
+    border:2px dashed var(--line);
+    border-radius:10px;
+    background:var(--paper);
+    padding:34px 20px;
+    text-align:center;
+    cursor:pointer;
+    margin-bottom:20px;
+  }
+  .dropzone.drag{border-color:var(--accent);background:var(--accent-ink);}
+  .dropzone p{margin:0;font-size:13.5px;color:var(--muted);}
+  .dropzone .big{font-size:14.5px;font-weight:700;color:var(--ink);margin-bottom:4px;}
+  .thumb-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+    gap:14px;
+  }
+  .thumb{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:8px;
+    overflow:hidden;
+    position:relative;
+  }
+  .thumb img{
+    width:100%;
+    height:110px;
+    object-fit:cover;
+    display:block;
+  }
+  .thumb .fname{
+    font-family:ui-monospace,monospace;
+    font-size:11px;
+    padding:6px 8px;
+    background:#F5F6F2;
+    border-top:1px solid var(--line);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .thumb .remove{
+    position:absolute;
+    top:5px;right:5px;
+    width:22px;height:22px;
+    border-radius:50%;
+    background:rgba(0,0,0,0.6);
+    color:#fff;
+    border:none;
+    font-size:13px;
+    line-height:1;
+    cursor:pointer;
+    padding:0;
+  }
+  .note{
+    font-size:12px;
+    color:var(--accent);
+    background:var(--accent-ink);
+    border:1px solid #E8C4B8;
+    border-radius:6px;
+    padding:8px 12px;
+    margin-bottom:18px;
+  }
+  input[type=file]{display:none;}
+  .col-select{
+    display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;
+  }
+  .col-select label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px;}
+  select{
+    font-family:inherit;font-size:13px;padding:8px;border-radius:5px;border:1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Photo tagger</h1>
+    <div class="sub">VIP Outlet Deals — batch rename product photos to SKU</div>
+  </div>
+  <div class="stamp">Local &amp; private — nothing uploads anywhere</div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-text" id="progressText">0 / 0 items tagged</div>
+  <div class="bar-track"><div class="bar-fill" id="barFill"></div></div>
+  <div class="actions">
+    <button id="exportCsvBtn">Export mapping CSV</button>
+    <button id="downloadZipBtn" class="primary">Download ZIP</button>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="search-box">
+      <input id="searchInput" type="text" placeholder="Search SKU or name...">
+    </div>
+    <div class="item-list" id="itemList"></div>
+  </div>
+
+  <div class="main">
+    <div class="setup-card" id="setupCard">
+      <h3>Loaded catalog</h3>
+      <p id="loadedSummary">Preloaded with your current Available Now + Coming Soon list (122 items). Paste or upload a different CSV below to switch catalogs — the tool auto-detects the SKU and item-name columns.</p>
+      <textarea id="csvPaste" placeholder="Paste CSV text here..."></textarea>
+      <div class="row-flex">
+        <button id="loadPasteBtn">Load pasted CSV</button>
+        <label for="csvFile"><button type="button" onclick="document.getElementById('csvFile').click()">Upload CSV file</button></label>
+        <input type="file" id="csvFile" accept=".csv">
+        <button id="clearAllBtn">Reset session</button>
+      </div>
+      <div class="col-select" id="colSelect" style="display:none;">
+        <div>
+          <label>SKU column</label>
+          <select id="skuColSelect"></select>
+        </div>
+        <div>
+          <label>Name column</label>
+          <select id="nameColSelect"></select>
+        </div>
+        <div style="align-self:flex-end;">
+          <button id="applyColsBtn">Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="mainContent">
+      <div class="empty-main">Select an item on the left to start tagging photos.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let items = [];
+let skuData = {};
+let activeSku = null;
+let pendingHeaders = [];
+let pendingRows = [];
+
+const DEFAULT_ITEMS = [{"sku": "1481200", "name": "Midtown CH 7PC"}, {"sku": "1463446", "name": "LG 7.4 Cu. Ft. Ultra Large Capacity Smart Wi-fi Enabled Front Load Electric Dryer With Turbosteam And Built-in Intelligence"}, {"sku": "1987069", "name": "Brio Reverse Osmosis"}, {"sku": "1805416", "name": "SS Me21db630012 2.1 Cu. Ft."}, {"sku": "1663899", "name": "LG Lronc0605v RF 6 CU FT"}, {"sku": "VTRWALDRO", "name": "MSI Waldron 30MIL 12mm 9x72 Rigid Core Vinyl Waterproof Flooring"}, {"sku": "TC472", "name": "Resolve Enchanting Maple 28MIL 6mm 9x60 SPC Rigid Core Vinyl Waterproof Flooring"}, {"sku": "TC130", "name": "Resolve Homestead 28MIL 6mm 9x60 SPC Rigid Core Vinyl Waterproof Flooring"}, {"sku": "TC465", "name": "Resolve Maple Beach 28MIL 6mm 9x60 SPC Rigid Core Vinyl Waterproof Flooring"}, {"sku": "TC441", "name": "Resolve Mesquite 28MIL 6mm 9x60 SPC Rigid Core Vinyl Waterproof Flooring"}, {"sku": "TC119", "name": "Resolve Niagara 28MIL 6mm 9x60 SPC Rigid Core Vinyl Waterproof Flooring"}, {"sku": "TC380", "name": "Resolve Sparta 28MIL 6mm 9x60 SPC Rigid Core Vinyl Waterproof Flooring"}, {"sku": "TC360", "name": "Resolve Timberline 28MIL 6mm 9x60 SPC Rigid Core Vinyl Waterproof Flooring"}, {"sku": "TC542", "name": "Resolve Vintage Oak 28MIL 6mm 9x60 SPC Rigid Core Vinyl Waterproof Flooring"}, {"sku": "TC601", "name": "Resolve English Manor 40MIL 7mm 9x60 SPC Rigid Core Vinyl Waterproof Flooring"}, {"sku": "TC465B", "name": "Resolve Maple Grove 40MIL 7mm 9x60 SPC Rigid Core Vinyl Waterproof Flooring"}, {"sku": "TC602", "name": "Resolve Pinecrest Lodge 40MIL 7mm 9x60 SPC Rigid Core Vinyl Waterproof Flooring"}, {"sku": "TC1681", "name": "Resolve Frontier Hickory 20MIL 5mm 7.2x48 SPC Rigid Core Vinyl Waterproof Flooring"}, {"sku": "VTLCLOLAN", "name": "MSI Smithcliff's Cloudland 22MIL 10mm 7.6x50.6 Luxury Vinyl Waterproof Flooring"}, {"sku": "XT-3016", "name": "Oake & Gray Frosted Marble 20MIL 5.5mm 16x32 Waterproof Click Plank Tiles"}, {"sku": "1014764545", "name": "LP Caudell Oak 22MIL 7.4x47.8 Vinyl Waterproof Flooring"}, {"sku": "1010305859", "name": "LP Shallowford Oak 22MIL 8.7x48 Vinyl Waterproof Flooring"}, {"sku": "1508-1B", "name": "Resolve Beige 20MIL 5mm 7.1x48 SPC Rigid Core Vinyl Waterproof Flooring"}, {"sku": "1012-9", "name": "Resolve Brown 20MIL 5mm 7.1x48 SPC Rigid Core Vinyl Waterproof Flooring"}, {"sku": "1021-13A", "name": "Resolve Grey 20MIL 5mm 7.1x48 SPC Rigid Core Vinyl Waterproof Flooring"}, {"sku": "1010234419", "name": "LP Chevron Dusk Cherry 22MIL 12x28 Vinyl Waterproof Flooring"}, {"sku": "1010234637", "name": "LP Chevron Sterling Oak 22MIL 12x28 Vinyl Waterproof Flooring"}, {"sku": "CSP-0005", "name": "Northridge Bedroom 5 Drawer Chest Light OAK"}, {"sku": "CSP-0007", "name": "ELK Home Furnishings Rowan Buffet Chest"}, {"sku": "CSP-0012", "name": "ELK Home Furnishings Gunthery Desk"}, {"sku": "CSP-0010", "name": "ELK Home Furnishings Maris 2 Dorr Cabinet"}, {"sku": "CSP-0008", "name": "ELK Home Furnighsings Asanso Sideboard"}, {"sku": "1014698877", "name": "Generac 18,000 Watt Air-cooled Whole House Home Standby Generator & 200-AMP Transfer Switch"}, {"sku": "1009436186", "name": "Ryobi 80V HP Brushless 42 In. Battery Electric Cordless Riding Lawn Tractor With (3) 80V 10Ah Batteries And Charger"}, {"sku": "333476179", "name": "Ridgid K-5208, 115-Volt 60Hz Drain Cleaning Sectional Machine With Guide Hose, (4) C-11 Cables, Cable Carrier, And Toolbox Kit"}, {"sku": "333328428", "name": "Biscayne Bay 54 In. 44.7 Cu. Ft. Commercial Auto / Cycle Defrost Merchandiser Upright Freezer In Black With Glass Door And LED Panel"}, {"sku": "326155189", "name": "Koolmore 53 In. 45 Cu. Ft. Auto / Cycle Defrost Two Door Commercial Display Upright Freezer In White"}, {"sku": "340085743", "name": "Genmitsu Proverxl 2X2 CNC Router Machine, 2' X 2' CNC Machine With 710W Spindle, Closed-loop Stepper Motor For Wood Metal Carving"}, {"sku": "1014057726", "name": "49 In. W X 30 In. L X 72 In. H, Stee"}, {"sku": "1002877771", "name": "56 In. W X 22 In. D Heavy Duty 23-Drawer Combination Rolling Tool Chest And Top Tool Cabinet Set In Matte Black"}, {"sku": "335811487", "name": "Bunn Lca-2 Ambient Liquid Coffee Dispenser, Stainless Steel/black Finish"}, {"sku": "1003526222", "name": "Dewalt 4000 PSI 3.5 GPM Gas Pressure Washer With Honda Gx270 Engine, Heavy-duty Commercial Cold Water Power Cleaner"}, {"sku": "1000240639", "name": "Ridgid 6 AMP Corded 6-1/8 In. Jointer/planer"}, {"sku": "1006427838", "name": "Dewalt 4400 PSI 4.0 GPM Gas Pressure Washer With 420cc Engine, Triplex Pump, Commercial Cold Water Power Washer"}, {"sku": "1013881842", "name": "Electric Concrete Floor Grinder 7 IN"}, {"sku": "1014687975", "name": "Humpback 3000 PSI 1.6 GPM Cold Water"}, {"sku": "321337404", "name": "Makita XGT 40V Max Brushless Cordless Brush Cutter Kit (4.0ah)"}, {"sku": "1010190981", "name": "Ryobi 40V HP Brushless 18 In. Battery Powered Rear Tine Tiller With (2) 6.0 AH Batteries And Charger"}, {"sku": "1011515513", "name": "9,000 BTU (doe) Port"}, {"sku": "1009624457", "name": "Gearwrench 1/4 In. X 3/8 In. And 1/2 In. Drive 6-Point Standard And Deep Sae/metric Master Impact Socket Set (209-piece)"}, {"sku": "RYi2200GRA", "name": "Ryobi Ryi2200gra 2,200 Starting Watt Digital Inverter Generator"}, {"sku": "1010491298", "name": "Echo 56V 195 MPH 795 CFM Cordless Battery Backpack Blower"}, {"sku": "1006572968", "name": "Makita XGT 40V Max Brushless Cordless 15 In. String Trimmer Kit (4.0 Ah)"}, {"sku": "1011604182", "name": "42.7 CC GAS 2-STROKE Straight Shaft"}, {"sku": "1008802238", "name": "20V MAX Lithium-ion Cross Line Laser"}, {"sku": "1011674764", "name": "41 In. Matte Black Aluminum Lo-side Truck Tool Box"}, {"sku": "1007840552", "name": "Platinum Medium Fireproof/waterproof"}, {"sku": "1002217191", "name": "12V MAX Lithium-ion 165 Ft. Green Self-leveling Cross-line Laser Level With 2.0Ah Battery, Charger, And Case"}, {"sku": "1009422001", "name": "40V HP Brushless Whi"}, {"sku": "1002855332", "name": "16 In. X 13 In. X 72 In. T-HANDLE LA"}, {"sku": "1014089096", "name": "Yt5330 Front Tine Forward Rotating G"}, {"sku": "1009034845", "name": "16 In. Utility Blower Fan Explosion Proof Fan 1100-Watt 60Hz 3450 RPM With Whe"}, {"sku": "1012322740", "name": "Milwaukee M18 Fuel 18V 16 In. Brushless Cordless Battery Powered Straight Shaft String Trimmer (tool-only)"}, {"sku": "1011815695", "name": "3-TIER Metal Locker IN Blue With TOO"}, {"sku": "1005648967", "name": "Legend Force 46 Cc Gas Powered 4-Stroke Walk Behind Edger"}, {"sku": "1006423928", "name": "DEL MAR 48 In. L X 36 In. W X 80 In."}, {"sku": "1013911853", "name": "Botticcino Gray 32 In. X 60 In. X 84 In. Solid Composite Stone Alcove Shower Kit With Walls And White Pan Base L/r Drain"}, {"sku": "1011806527", "name": "Carrara 34 In. X 48 In. X 84 In. Solid Composite Stone Alcove Shower Kit With Walls And Graphite Pan Base Center Drain"}, {"sku": "321267334", "name": "Summit Appliance 2.7 Cu. Ft. 115-Volt 24 In. Front Load Washer In White, Energy Star"}, {"sku": "1008125385", "name": "Doveton 60 In. W X 1"}, {"sku": "1012709647", "name": "Barrie 49 In. W X 22 In. D X 34.5 IN"}, {"sku": "1002953791", "name": "Hmptn BY 44 VNY 35X44 White"}, {"sku": "1002642595", "name": "Sonoma 36 In. W X 22 In. D X 34 In. H Bath Vanity In Pebble Gray"}, {"sku": "1013338560", "name": "1-100 G Automatic Particle Filling M"}, {"sku": "1005445381", "name": "Timeless Home Silas 30\"W X 19\"D X 34"}, {"sku": "1008138031", "name": "Classic 500 36 In. L"}, {"sku": "1011158333", "name": "31\" W X 21\" D X 21.5\" H Single Wall"}, {"sku": "1012647516", "name": "36 In. W Single Sink Freestanding BA"}, {"sku": "1007605350", "name": "San Diego 30 In W X"}, {"sku": "1005855956", "name": "Hampton Bay Courtland 33 In. W X 24 In. D X 96 In. H Assembled Shaker Double Oven Kitchen Cabinet In Polar White"}, {"sku": "1009896935", "name": "Nextile 32 In. W 60 In. H Composite Direct-to-stud Four-piece Alc"}, {"sku": "1014218420", "name": "Southfield 31 In. Single Sink White"}, {"sku": "1014059849", "name": "30 In. W X 40 In. H Rectangular Frameless Anti-fog LED Front Light Backlit Wall Mirror Bathroom Vanity Mirror"}, {"sku": "1014098141", "name": "White 40 In. W X 40 In. H LED Lighted Square Bathroom Vanity Wall Mirror Metal Framed Mirror"}, {"sku": "1014017920", "name": "36 In. W X 36 In. H Round LED Frameless Wall Mounted Memory Function 3-Colors Dimmable Anti-fog Bathroom Vanity Mirror"}, {"sku": "990524444", "name": "MEM Hotb Serta KG ST"}, {"sku": "990344341", "name": "Nowl 10X8 4K NVR"}, {"sku": "990393735", "name": "Currentbody Skin Anti-acne LED Face Mask"}, {"sku": "990385706", "name": "Currentbody Skin LED Light Therapy Face Mask"}, {"sku": "990463482", "name": "Woojer Vest"}, {"sku": "990423049", "name": "Pilot X1 Pool Vacuum"}, {"sku": "990445349", "name": "Swann Mxrgr Mini 3PK"}, {"sku": "1006387916", "name": "Vissani Mdbf18ss - 18.7CF BM"}, {"sku": "1006201604", "name": "Tool Storage 84 In. W Heavy Duty Matte Black Mobile Workbench"}, {"sku": "1002926586", "name": "Husky 61 In. W X 26 In. D Heavy Duty 10-Drawer 1-Door Mobile Workbench"}, {"sku": "1011531709", "name": "84 In. W 18 In. D 15-DRAWER Mobile W"}, {"sku": "1012141967", "name": "Executive Fire And Waterproof Home And Office Safe, Bone White"}, {"sku": "1005019985", "name": "46 In.w X 51 In. D Standard Duty 9-Drawer Mobile Work Bench With"}, {"sku": "1012507597", "name": "Ryobi 40V 21\" Cross CUT Mower GEN"}, {"sku": "1014168173", "name": "Husky 52-10 Matte Army Green"}, {"sku": "1009511042", "name": "Modular Tool Storage 52 In. W X 20 In. D Standard Duty Black Mobile Workbench Cabinet"}, {"sku": "1010070255", "name": "Husky 42-12 Combo Black"}, {"sku": "1011211626", "name": "46 In. 9-DRAWER 24.5 In. Deep Mobile"}, {"sku": "990382580", "name": "Moberly BAR Cabinet"}, {"sku": "1009253038", "name": "Foyil 55 In. X 31 In. Solid Surface Stone Resin Flatbottom Freestanding Bathtub Soaking Bathtub In Matte White"}, {"sku": "1010438319", "name": "S7a Washlet Elongated Electric Heate"}, {"sku": "1012501803", "name": "Collette 72 In. Double Sink Cinnamon Oak Bath Vanity With Carrara White Marble"}, {"sku": "1008125374", "name": "Doveton 60 In. W X 19 In. D X 34 In. H Double Sink"}, {"sku": "1010393195", "name": "Collette 48 In W X 22 In D X 35 In H Single Sink Bath Vanity In C"}, {"sku": "1014218397", "name": "Sellan 49 In. Single Sink Dark Walnu"}, {"sku": "1010393203", "name": "Collette 60 In. W X 22 In. D X 35 IN"}, {"sku": "1012647370", "name": "Autumn 48 In. W Freestanding Single"}, {"sku": "1009250275", "name": "Hanna 48 In. W X 19 In. D X 34.50 IN"}, {"sku": "1012647384", "name": "Doveton 48 In. Single Sink Sage Green Bath Vanity With White Engineered Marble"}, {"sku": "1006330507", "name": "Bellington 36 In. W"}, {"sku": "1007645956", "name": "Glacier Bay Huckleberry 42 In. W X 19 In. D X 34 In. H Single Sink Bath Vanity"}, {"sku": "1013163212", "name": "Kesset 30 In. Single Sink Light Oak Bath Vanity With White Engineered Carrara"}, {"sku": "1006980590", "name": "6 Ft. L X 39 In. D Unfinished Saman Solid Wood Butcher Block Countertop Island"}, {"sku": "1007185746", "name": "Everclean 60 In. X 32 In. Left Drain Soaking Tub In White"}, {"sku": "1012214948", "name": "36 In. W X 19 In. D X 34 In. H 1-SIN"}, {"sku": "984307263", "name": "Airpods Max 2 - mid"}, {"sku": "990351744", "name": "3 Burner LP Grill"}];
+
+function extOf(filename){
+  const m = /\.([a-zA-Z0-9]+)$/.exec(filename);
+  return m ? m[1].toLowerCase() : 'jpg';
+}
+
+function computeNames(sku){
+  const files = skuData[sku].files;
+  if(files.length === 1){
+    files[0].outName = sku + '.jpg';
+  } else {
+    files.forEach((f,i)=>{
+      f.outName = sku + '_' + (i+1) + '.jpg';
+    });
+  }
+}
+
+function compressImage(file){
+  return new Promise((resolve)=>{
+    const img = new Image();
+    const objUrl = URL.createObjectURL(file);
+    img.onload = ()=>{
+      const MAX = 1600;
+      let w = img.width, h = img.height;
+      if(w > h && w > MAX){ h = Math.round(h*MAX/w); w = MAX; }
+      else if(h > MAX){ w = Math.round(w*MAX/h); h = MAX; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      canvas.toBlob(blob=>{
+        URL.revokeObjectURL(objUrl);
+        if(blob) resolve({blob, ok:true});
+        else resolve({blob:file, ok:false});
+      }, 'image/jpeg', 0.82);
+    };
+    img.onerror = ()=>{
+      URL.revokeObjectURL(objUrl);
+      resolve({blob:file, ok:false});
+    };
+    img.src = objUrl;
+  });
+}
+
+function ensureSku(sku){
+  if(!skuData[sku]) skuData[sku] = {files:[]};
+}
+
+function taggedCount(){
+  return items.filter(it => skuData[it.sku] && skuData[it.sku].files.length>0).length;
+}
+
+function renderProgress(){
+  const total = items.length;
+  const done = taggedCount();
+  document.getElementById('progressText').textContent = done + ' / ' + total + ' items tagged';
+  document.getElementById('barFill').style.width = total ? (done/total*100)+'%' : '0%';
+}
+
+function renderList(){
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const list = document.getElementById('itemList');
+  list.innerHTML = '';
+  items.filter(it => !q || it.sku.toLowerCase().includes(q) || it.name.toLowerCase().includes(q))
+    .forEach(it=>{
+      const count = skuData[it.sku] ? skuData[it.sku].files.length : 0;
+      const row = document.createElement('div');
+      row.className = 'item-row' + (it.sku===activeSku?' active':'');
+      row.innerHTML = '<div class="dot'+(count>0?' done':'')+'"></div>'+
+        '<div class="info"><div class="name">'+escapeHtml(it.name)+'</div><div class="sku mono">'+escapeHtml(it.sku)+'</div></div>'+
+        (count>0 ? '<div class="count-badge">'+count+'</div>' : '');
+      row.onclick = ()=>{ activeSku = it.sku; renderList(); renderMain(); };
+      list.appendChild(row);
+    });
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderMain(){
+  const main = document.getElementById('mainContent');
+  if(!activeSku){
+    main.innerHTML = '<div class="empty-main">Select an item on the left to start tagging photos.</div>';
+    return;
+  }
+  const item = items.find(it=>it.sku===activeSku);
+  ensureSku(activeSku);
+  const files = skuData[activeSku].files;
+
+  main.innerHTML = '';
+
+  const th = document.createElement('div');
+  th.className = 'tag-header';
+  th.innerHTML = '<h2>'+escapeHtml(item.name)+'</h2><div class="sku-pill mono">'+escapeHtml(item.sku)+'</div>';
+  main.appendChild(th);
+
+  const dz = document.createElement('div');
+  dz.className = 'dropzone';
+  dz.innerHTML = '<div class="big">Drop photos here</div><p>or click to browse — drop order sets the file order</p>';
+  dz.onclick = ()=>fileInput.click();
+  dz.ondragover = e=>{e.preventDefault(); dz.classList.add('drag');};
+  dz.ondragleave = ()=>dz.classList.remove('drag');
+  dz.ondrop = e=>{
+    e.preventDefault();
+    dz.classList.remove('drag');
+    addFiles(e.dataTransfer.files);
+  };
+  main.appendChild(dz);
+
+  const fileInput = document.createElement('input');
+  fileInput.type='file';
+  fileInput.accept='image/*';
+  fileInput.multiple=true;
+  fileInput.onchange = e=>addFiles(e.target.files);
+  main.appendChild(fileInput);
+
+  if(files.length){
+    const note = document.createElement('div');
+    note.className='note';
+    note.textContent = 'Download your ZIP before closing this tab — photos live in the browser only until then.';
+    main.appendChild(note);
+  }
+
+  const grid = document.createElement('div');
+  grid.className='thumb-grid';
+  files.forEach((f,i)=>{
+    const t = document.createElement('div');
+    t.className='thumb';
+    t.innerHTML = '<img src="'+f.url+'"><div class="fname mono">'+f.outName+'</div><button class="remove">×</button>';
+    t.querySelector('.remove').onclick = ()=>{
+      URL.revokeObjectURL(f.url);
+      files.splice(i,1);
+      computeNames(activeSku);
+      renderMain();
+      renderList();
+      renderProgress();
+    };
+    grid.appendChild(t);
+  });
+  main.appendChild(grid);
+
+  async function addFiles(fileList){
+    const incoming = Array.from(fileList).filter(f=>f.type.startsWith('image/') || /\.(heic|heif)$/i.test(f.name));
+    if(!incoming.length) return;
+    const note = document.createElement('div');
+    note.className='note';
+    note.textContent = 'Compressing ' + incoming.length + ' photo(s)...';
+    main.insertBefore(note, grid);
+    let failCount = 0;
+    for(const file of incoming){
+      const result = await compressImage(file);
+      if(!result.ok) failCount++;
+      files.push({file: result.blob, url:URL.createObjectURL(result.blob), outName:''});
+    }
+    computeNames(activeSku);
+    renderMain();
+    renderList();
+    renderProgress();
+    if(failCount){
+      alert(failCount + ' photo(s) could not be compressed (often means they\'re still in HEIC format). They were added at original size — for best results, set your iPhone to Settings > Camera > Formats > Most Compatible before your next shoot, or re-export those as JPEG first.');
+    }
+  }
+}
+
+document.getElementById('searchInput').addEventListener('input', renderList);
+
+document.getElementById('exportCsvBtn').onclick = ()=>{
+  const rows = [['SKU','Item Name','Photo Count','Filenames','Suggested Primary Path']];
+  items.forEach(it=>{
+    const d = skuData[it.sku];
+    const count = d ? d.files.length : 0;
+    const names = d ? d.files.map(f=>f.outName).join(', ') : '';
+    const primary = count ? '/images/'+ (count===1 ? it.sku+'.'+extOf(d.files[0].file.name) : it.sku+'_1.'+extOf(d.files[0].file.name)) : '';
+    rows.push([it.sku, it.name, count, names, primary]);
+  });
+  const csv = rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'photo-mapping.csv';
+  a.click();
+};
+
+document.getElementById('downloadZipBtn').onclick = async ()=>{
+  const zip = new JSZip();
+  let any = false;
+  items.forEach(it=>{
+    const d = skuData[it.sku];
+    if(!d) return;
+    d.files.forEach(f=>{
+      zip.file(f.outName, f.file);
+      any = true;
+    });
+  });
+  if(!any){ alert('No photos tagged yet.'); return; }
+  const blob = await zip.generateAsync({type:'blob'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'vip-outlet-photos.zip';
+  a.click();
+};
+
+document.getElementById('clearAllBtn').onclick = ()=>{
+  if(!confirm('Clear all tagged photos for this session?')) return;
+  Object.values(skuData).forEach(d=>d.files.forEach(f=>URL.revokeObjectURL(f.url)));
+  skuData = {};
+  activeSku = null;
+  renderList();
+  renderMain();
+  renderProgress();
+};
+
+function loadItemsFromRows(headers, rows, skuCol, nameCol){
+  items = rows
+    .map(r=>({sku: String(r[skuCol]||'').trim(), name: String(r[nameCol]||'').trim()}))
+    .filter(it=>it.sku);
+  skuData = {};
+  activeSku = null;
+  document.getElementById('loadedSummary').textContent = 'Loaded '+items.length+' items from your CSV.';
+  document.getElementById('colSelect').style.display='none';
+  renderList();
+  renderMain();
+  renderProgress();
+}
+
+function detectCol(headers, candidates){
+  for(const c of candidates){
+    const hit = headers.find(h=>h.toLowerCase().trim()===c);
+    if(hit) return hit;
+  }
+  for(const c of candidates){
+    const hit = headers.find(h=>h.toLowerCase().includes(c));
+    if(hit) return hit;
+  }
+  return headers[0];
+}
+
+function handleParsed(results){
+  const headers = results.meta.fields || [];
+  const rows = results.data;
+  pendingHeaders = headers;
+  pendingRows = rows;
+  const skuGuess = detectCol(headers, ['sku','model']);
+  const nameGuess = detectCol(headers, ['item name','customer-facing name','name']);
+  if(skuGuess && nameGuess){
+    loadItemsFromRows(headers, rows, skuGuess, nameGuess);
+  }
+  const skuSel = document.getElementById('skuColSelect');
+  const nameSel = document.getElementById('nameColSelect');
+  skuSel.innerHTML = headers.map(h=>'<option'+(h===skuGuess?' selected':'')+'>'+escapeHtml(h)+'</option>').join('');
+  nameSel.innerHTML = headers.map(h=>'<option'+(h===nameGuess?' selected':'')+'>'+escapeHtml(h)+'</option>').join('');
+  document.getElementById('colSelect').style.display='flex';
+}
+
+document.getElementById('applyColsBtn').onclick = ()=>{
+  loadItemsFromRows(pendingHeaders, pendingRows, document.getElementById('skuColSelect').value, document.getElementById('nameColSelect').value);
+};
+
+document.getElementById('loadPasteBtn').onclick = ()=>{
+  const text = document.getElementById('csvPaste').value;
+  if(!text.trim()) return;
+  Papa.parse(text, {header:true, skipEmptyLines:true, complete: handleParsed});
+};
+
+document.getElementById('csvFile').onchange = (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  Papa.parse(file, {header:true, skipEmptyLines:true, complete: handleParsed});
+};
+
+items = DEFAULT_ITEMS;
+renderList();
+renderMain();
+renderProgress();
+</script>
+</body>
+</html>
